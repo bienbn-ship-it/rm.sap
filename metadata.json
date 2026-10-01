@@ -1,0 +1,8 @@
+{
+  "name": "RM_Demo phân tích dữ liệu SAP",
+  "description": "Phân tích Đặt hàng, Nhập/Xuất/Tồn, Suất ăn, Hạn sử dụng và Chấm điểm rủi ro vận hành Bếp ăn / Canteen",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
