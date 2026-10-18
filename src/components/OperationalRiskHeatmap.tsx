@@ -13,6 +13,7 @@ import {
   Cell,
 } from 'recharts';
 import { CanteenSummary, CanteenRecord, RiskThresholds } from '../types/canteen';
+import { useLanguage } from '../context/LanguageContext';
 import {
   Flame,
   AlertTriangle,
@@ -61,6 +62,7 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
   records = [],
   thresholds,
 }) => {
+  const { language, t } = useLanguage();
   const [viewMode, setViewMode] = useState<ViewMode>('matrix');
   const [filterZone, setFilterZone] = useState<RiskZoneFilter>('all');
   const [selectedCanteen, setSelectedCanteen] = useState<string | null>(null);
@@ -94,20 +96,20 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
 
       // Classify operational risk quadrant / zone
       let riskZone: 'critical' | 'overstock' | 'extra_order' | 'safe' = 'safe';
-      let riskZoneTitle = 'Vận hành tối ưu';
+      let riskZoneTitle = language === 'ko' ? '안정적 최적 통제' : 'Vận hành tối ưu';
       let riskZoneBadgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
 
       if (invRatio >= invHighThreshold && extraPct >= extraOrderHighThreshold) {
         riskZone = 'critical';
-        riskZoneTitle = 'Rủi ro Kép Tích Lũy';
+        riskZoneTitle = language === 'ko' ? '심각한 복합 누적 리스크' : 'Rủi ro Kép Tích Lũy';
         riskZoneBadgeColor = 'bg-rose-50 text-rose-700 border-rose-300';
       } else if (invRatio >= invHighThreshold) {
         riskZone = 'overstock';
-        riskZoneTitle = 'Nguy cơ ứ đọng kho';
+        riskZoneTitle = language === 'ko' ? '재고 과다 및 정체 위험' : 'Nguy cơ ứ đọng kho';
         riskZoneBadgeColor = 'bg-amber-50 text-amber-700 border-amber-300';
       } else if (extraPct >= extraOrderHighThreshold) {
         riskZone = 'extra_order';
-        riskZoneTitle = 'Nguy cơ đặt hàng phát sinh';
+        riskZoneTitle = language === 'ko' ? '추가/긴급발주 과다 위험' : 'Nguy cơ đặt hàng phát sinh';
         riskZoneBadgeColor = 'bg-orange-50 text-orange-700 border-orange-300';
       }
 
@@ -120,7 +122,7 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
         isCritical: riskZone === 'critical',
       };
     });
-  }, [summary, invHighThreshold, extraOrderHighThreshold]);
+  }, [summary, invHighThreshold, extraOrderHighThreshold, language]);
 
   // Filtered canteen list based on risk zone button
   const filteredCanteens = useMemo(() => {
@@ -289,15 +291,14 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
               <Flame className="w-5 h-5" />
             </span>
             <h3 className="text-base font-bold text-slate-900">
-              Bản đồ Nhiệt (Heatmap) Tương quan Tồn kho & Đặt hàng Quá mức
+              {t.heatmapTitle}
             </h3>
             <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-              Rủi ro vận hành tích lũy
+              {language === 'ko' ? '누적 복합 리스크' : 'Rủi ro vận hành tích lũy'}
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Trực quan hóa ma trận tương quan giữa <strong>Tỷ lệ tồn kho (inventory_ratio_pct)</strong> và{' '}
-            <strong>Tỷ lệ đặt hàng quá mức (extra_order_pct)</strong> theo từng Canteen để phát hiện các đơn vị tích lũy rủi ro kép.
+            {t.heatmapSubtitle}
           </p>
         </div>
 
@@ -313,7 +314,7 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Ma trận Ô Nhiệt 4x4</span>
+              <span>{t.heatmapMatrixTab}</span>
             </button>
             <button
               onClick={() => setViewMode('scatter')}
@@ -324,7 +325,7 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Tương quan 2D (Scatter)</span>
+              <span>{t.heatmapScatterTab}</span>
             </button>
             <button
               onClick={() => setViewMode('list')}
@@ -335,7 +336,7 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
               }`}
             >
               <TrendingUp className="w-3.5 h-3.5" />
-              <span>Bảng Chỉ số Nhiệt</span>
+              <span>{language === 'ko' ? '지표 리스트' : 'Bảng Chỉ số Nhiệt'}</span>
             </button>
           </div>
         </div>
@@ -353,16 +354,16 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-rose-700 uppercase tracking-wider">
-              Rủi ro Kép Tích Lũy
+              {t.heatmapCriticalZone}
             </span>
             <AlertTriangle className="w-4 h-4 text-rose-600" />
           </div>
           <div className="mt-1 flex items-baseline space-x-2">
             <span className="text-xl font-black text-rose-900">{stats.criticalCount}</span>
-            <span className="text-[11px] text-rose-600 font-medium">Canteen</span>
+            <span className="text-[11px] text-rose-600 font-medium">{language === 'ko' ? '개소' : 'Canteen'}</span>
           </div>
           <p className="text-[10px] text-rose-600 mt-1 line-clamp-1">
-            Tồn kho &gt; {invHighThreshold}% &amp; Đặt &gt; {extraOrderHighThreshold}%
+            {language === 'ko' ? `재고 > ${invHighThreshold}% & 발주 > ${extraOrderHighThreshold}%` : `Tồn kho > ${invHighThreshold}% & Đặt > ${extraOrderHighThreshold}%`}
           </p>
         </div>
 
@@ -376,16 +377,16 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider">
-              Nguy cơ ứ đọng kho
+              {t.heatmapOverstockZone}
             </span>
             <Package className="w-4 h-4 text-amber-600" />
           </div>
           <div className="mt-1 flex items-baseline space-x-2">
             <span className="text-xl font-black text-amber-900">{stats.overstockCount}</span>
-            <span className="text-[11px] text-amber-600 font-medium">Canteen</span>
+            <span className="text-[11px] text-amber-600 font-medium">{language === 'ko' ? '개소' : 'Canteen'}</span>
           </div>
           <p className="text-[10px] text-amber-600 mt-1 line-clamp-1">
-            Tồn kho &gt; {invHighThreshold}%, Đặt kiểm soát
+            {language === 'ko' ? `재고 > ${invHighThreshold}%, 발주 정상` : `Tồn kho > ${invHighThreshold}%, Đặt kiểm soát`}
           </p>
         </div>
 
@@ -399,16 +400,16 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-orange-700 uppercase tracking-wider">
-              Đặt hàng phát sinh cao
+              {t.heatmapExtraOrderZone}
             </span>
             <TrendingUp className="w-4 h-4 text-orange-600" />
           </div>
           <div className="mt-1 flex items-baseline space-x-2">
             <span className="text-xl font-black text-orange-900">{stats.extraOrderCount}</span>
-            <span className="text-[11px] text-orange-600 font-medium">Canteen</span>
+            <span className="text-[11px] text-orange-600 font-medium">{language === 'ko' ? '개소' : 'Canteen'}</span>
           </div>
           <p className="text-[10px] text-orange-600 mt-1 line-clamp-1">
-            Đặt &gt; {extraOrderHighThreshold}%, Tồn kho bình thường
+            {language === 'ko' ? `발주 > ${extraOrderHighThreshold}%, 재고 정상` : `Đặt > ${extraOrderHighThreshold}%, Tồn kho bình thường`}
           </p>
         </div>
 
@@ -422,16 +423,16 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wider">
-              Kiểm soát tối ưu
+              {t.heatmapOptimalZone}
             </span>
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="mt-1 flex items-baseline space-x-2">
             <span className="text-xl font-black text-emerald-900">{stats.safeCount}</span>
-            <span className="text-[11px] text-emerald-600 font-medium">Canteen</span>
+            <span className="text-[11px] text-emerald-600 font-medium">{language === 'ko' ? '개소' : 'Canteen'}</span>
           </div>
           <p className="text-[10px] text-emerald-600 mt-1 line-clamp-1">
-            Tồn kho &amp; đặt hàng đều an toàn
+            {language === 'ko' ? '재고 및 발주 모두 정상 범위' : 'Tồn kho & đặt hàng đều an toàn'}
           </p>
         </div>
       </div>
@@ -441,28 +442,28 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 gap-2">
             <div className="flex items-center space-x-2">
-              <span className="font-semibold text-slate-700">Trục Tung (Y):</span>
-              <span>Tỷ lệ tồn kho (inventory_ratio_pct)</span>
+              <span className="font-semibold text-slate-700">{language === 'ko' ? '세로축 (Y):' : 'Trục Tung (Y):'}</span>
+              <span>{language === 'ko' ? '기말재고 계수/비율' : 'Tỷ lệ tồn kho (inventory_ratio_pct)'}</span>
               <span className="text-slate-300">|</span>
-              <span className="font-semibold text-slate-700">Trục Hoành (X):</span>
-              <span>Tỷ lệ đặt hàng quá mức (extra_order_pct)</span>
+              <span className="font-semibold text-slate-700">{language === 'ko' ? '가로축 (X):' : 'Trục Hoành (X):'}</span>
+              <span>{language === 'ko' ? '추가발주(PR3) 비율' : 'Tỷ lệ đặt hàng quá mức (extra_order_pct)'}</span>
             </div>
             <div className="flex items-center space-x-3 text-[11px]">
               <span className="flex items-center space-x-1">
                 <span className="w-3 h-3 rounded-xs bg-emerald-500"></span>
-                <span>An toàn</span>
+                <span>{language === 'ko' ? '안심' : 'An toàn'}</span>
               </span>
               <span className="flex items-center space-x-1">
                 <span className="w-3 h-3 rounded-xs bg-amber-400"></span>
-                <span>Ứ đọng kho</span>
+                <span>{language === 'ko' ? '재고과다' : 'Ứ đọng kho'}</span>
               </span>
               <span className="flex items-center space-x-1">
                 <span className="w-3 h-3 rounded-xs bg-orange-400"></span>
-                <span>Phát sinh đơn</span>
+                <span>{language === 'ko' ? '추가발주' : 'Phát sinh đơn'}</span>
               </span>
               <span className="flex items-center space-x-1">
                 <span className="w-3 h-3 rounded-xs bg-rose-600"></span>
-                <span className="font-semibold text-rose-700">Rủi ro Kép Tích Lũy</span>
+                <span className="font-semibold text-rose-700">{language === 'ko' ? '복합 위험' : 'Rủi ro Kép Tích Lũy'}</span>
               </span>
             </div>
           </div>
@@ -553,15 +554,15 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
                           <div className="flex items-center justify-between text-[9px] opacity-80 pt-0.5">
                             <span>
                               {cell.zone === 'critical'
-                                ? '🚨 Nguy cấp'
+                                ? (language === 'ko' ? '🚨 위험' : '🚨 Nguy cấp')
                                 : cell.zone === 'overstock'
-                                ? '📦 Ứ đọng'
+                                ? (language === 'ko' ? '📦 과다' : '📦 Ứ đọng')
                                 : cell.zone === 'extra_order'
-                                ? '⚡ Phát sinh'
-                                : '✅ Tối ưu'}
+                                ? (language === 'ko' ? '⚡ 추가' : '⚡ Phát sinh')
+                                : (language === 'ko' ? '✅ 정상' : '✅ Tối ưu')}
                             </span>
                             {cell.canteens.length > 0 && (
-                              <span className="underline text-[9px]">Xem chi tiết</span>
+                              <span className="underline text-[9px]">{language === 'ko' ? '상세보기' : 'Xem chi tiết'}</span>
                             )}
                           </div>
                         </div>
@@ -580,7 +581,7 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
                   ))}
                 </div>
                 <div className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider pt-1">
-                  Tỷ lệ đặt hàng quá mức / phát sinh (X)
+                  {language === 'ko' ? '추가발주(PR3) 초과 비율 (X축)' : 'Tỷ lệ đặt hàng quá mức / phát sinh (X)'}
                 </div>
               </div>
             </div>
@@ -593,11 +594,11 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-500">
             <div>
-              <span className="font-semibold text-slate-700">Biểu đồ Phân tán Nhiệt độ (2D Scatter Plot):</span> Mỗi điểm là một Canteen. Kích thước điểm tương ứng với giá trị tồn kho. Màu điểm biểu thị độ nóng của rủi ro tích lũy.
+              <span className="font-semibold text-slate-700">{language === 'ko' ? '산점도 열지도 (2D Scatter Plot):' : 'Biểu đồ Phân tán Nhiệt độ (2D Scatter Plot):'}</span> {language === 'ko' ? '각 포인트는 급식소를 나타냅니다. 원의 크기는 재고액, 색상은 누적 리스크 수준입니다.' : 'Mỗi điểm là một Canteen. Kích thước điểm tương ứng với giá trị tồn kho. Màu điểm biểu thị độ nóng của rủi ro tích lũy.'}
             </div>
             <div className="flex items-center space-x-2 text-[11px]">
               <span className="inline-block w-2.5 h-2.5 rounded-full bg-rose-600"></span>
-              <span>Vùng Rủi ro Kép (Góc trên - phải)</span>
+              <span>{language === 'ko' ? '복합 위험 구역 (우측 상단)' : 'Vùng Rủi ro Kép (Góc trên - phải)'}</span>
             </div>
           </div>
 
@@ -735,7 +736,7 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
 
                           <div className="space-y-1.5 text-[11px]">
                             <div className="flex justify-between">
-                              <span className="text-slate-400">Tỷ lệ tồn kho:</span>
+                              <span className="text-slate-400">Hệ số Tồn / GR:</span>
                               <span
                                 className={`font-mono font-bold ${
                                   data.inventory_ratio_pct >= invHighThreshold
@@ -743,7 +744,13 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
                                     : 'text-emerald-300'
                                 }`}
                               >
-                                {data.inventory_ratio_pct}%
+                                {data.inventory_to_gr_ratio !== undefined ? data.inventory_to_gr_ratio.toFixed(2) : (data.ending_inventory_value / (data.gr_value || 1)).toFixed(2)} ({data.inventory_ratio_pct}%)
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-400">Hệ số Tồn / GI:</span>
+                              <span className="font-mono text-indigo-300 font-semibold">
+                                {data.inventory_to_gi_ratio !== undefined ? data.inventory_to_gi_ratio.toFixed(2) : (data.ending_inventory_value / (data.gi_value || 1)).toFixed(2)}
                               </span>
                             </div>
                             <div className="flex justify-between">
@@ -830,7 +837,7 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
                 <tr>
                   <th className="px-4 py-3">Canteen</th>
                   <th className="px-3 py-3 text-center">Phân loại Vùng Rủi Ro</th>
-                  <th className="px-3 py-3 text-right">Tồn Kho (inventory_ratio_pct)</th>
+                  <th className="px-3 py-3 text-right" title="Hệ số Tồn kho/GR = Tồn cuối / GR | Tồn kho/GI = Tồn cuối / GI">Hệ số Tồn (GR / GI)</th>
                   <th className="px-3 py-3 text-right">Đặt Quá Mức (extra_order_pct)</th>
                   <th className="px-3 py-3 text-center">Điểm Rủi Ro Tích Lũy</th>
                   <th className="px-3 py-3 text-right">Giá trị Tồn Kho</th>
@@ -877,10 +884,13 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
                           className={`font-semibold ${
                             item.inventory_ratio_pct >= invHighThreshold
                               ? 'text-rose-600 font-bold'
-                              : 'text-slate-700'
+                              : 'text-slate-800'
                           }`}
                         >
-                          {item.inventory_ratio_pct}%
+                          GR: {item.inventory_to_gr_ratio !== undefined ? item.inventory_to_gr_ratio.toFixed(2) : (item.ending_inventory_value / (item.gr_value || 1)).toFixed(2)}
+                        </span>
+                        <span className="text-[10px] text-slate-400 block" title="Hệ số Tồn kho cuối / GI xuất kho">
+                          GI: {item.inventory_to_gi_ratio !== undefined ? item.inventory_to_gi_ratio.toFixed(2) : (item.ending_inventory_value / (item.gi_value || 1)).toFixed(2)}
                         </span>
                         <div className="w-20 bg-slate-100 h-1.5 rounded-full ml-auto mt-1 overflow-hidden">
                           <div
@@ -961,12 +971,22 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
       <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs space-y-2">
         <div className="flex items-center space-x-2 text-slate-900 font-bold">
           <Info className="w-4 h-4 text-indigo-600" />
-          <span>Ý nghĩa nghiệp vụ kiểm toán rủi ro vận hành tích lũy</span>
+          <span>{language === 'ko' ? '운영 리스크 복합 감사 분석의 의미' : 'Ý nghĩa nghiệp vụ kiểm toán rủi ro vận hành tích lũy'}</span>
         </div>
         <p className="text-slate-600 leading-relaxed">
-          Tương quan giữa <strong>Tỷ lệ tồn kho</strong> và <strong>Tỷ lệ đặt hàng quá mức (PR3)</strong> là tấm gương phản chiếu mức độ kiểm soát chuỗi cung ứng tại bếp ăn.
-          Khi một Canteen vừa có tỷ lệ tồn kho cao (&gt; {invHighThreshold}%), vừa liên tục phát sinh đơn hàng ngoài kế hoạch (&gt; {extraOrderHighThreshold}%), 
-          đây là dấu hiệu <strong>lãng phí kép và mất kiểm soát định mức</strong>: kho chưa giải phóng nhưng vẫn mua thêm, gây áp lực hết hạn nguyên liệu và đội chi phí bữa ăn.
+          {language === 'ko' ? (
+            <>
+              <strong>재고율</strong>과 <strong>추가발주율(PR3)</strong> 간의 상관관계는 급식소 공급망 통제 수준을 보여주는 핵심 척도입니다. 
+              한 급식소에서 높은 재고율(&gt; {invHighThreshold}%)과 지속적인 계획 외 추가발주(&gt; {extraOrderHighThreshold}%)가 동시에 발생하면, 
+              이는 <strong>이중 손실 및 정체 위험</strong>을 의미합니다: 기존 재고가 소진되지 않았음에도 계속 발주하여 유통기한 초과 폐기 및 식재료 원가 상승을 초래합니다.
+            </>
+          ) : (
+            <>
+              Tương quan giữa <strong>Tỷ lệ tồn kho</strong> và <strong>Tỷ lệ đặt hàng quá mức (PR3)</strong> là tấm gương phản chiếu mức độ kiểm soát chuỗi cung ứng tại bếp ăn.
+              Khi một Canteen vừa có tỷ lệ tồn kho cao (&gt; {invHighThreshold}%), vừa liên tục phát sinh đơn hàng ngoài kế hoạch (&gt; {extraOrderHighThreshold}%), 
+              đây là dấu hiệu <strong>lãng phí kép và mất kiểm soát định mức</strong>: kho chưa giải phóng nhưng vẫn mua thêm, gây áp lực hết hạn nguyên liệu và đội chi phí bữa ăn.
+            </>
+          )}
         </p>
       </div>
 
@@ -981,10 +1001,10 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
                 </span>
                 <div>
                   <h4 className="text-sm font-bold text-slate-900">
-                    Phân tích Ô Ma Trận Nhiệt
+                    {language === 'ko' ? '열지도 셀 심층 분석' : 'Phân tích Ô Ma Trận Nhiệt'}
                   </h4>
                   <p className="text-[11px] text-slate-500">
-                    Tồn kho: {selectedCell.invLabel} | Đặt quá mức: {selectedCell.extraLabel}
+                    {language === 'ko' ? '재고율' : 'Tồn kho'}: {selectedCell.invLabel} | {language === 'ko' ? '추가발주' : 'Đặt quá mức'}: {selectedCell.extraLabel}
                   </p>
                 </div>
               </div>
@@ -999,28 +1019,28 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
             <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
               <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs">
                 <div>
-                  <span className="font-semibold text-slate-700">Trạng thái rủi ro vùng:</span>
+                  <span className="font-semibold text-slate-700">{language === 'ko' ? '구역 리스크 상태:' : 'Trạng thái rủi ro vùng:'}</span>
                   <div className="text-sm font-bold text-slate-900 mt-0.5">
                     {selectedCell.zone === 'critical'
-                      ? '🚨 Vùng Rủi Ro Kép Tích Lũy'
+                      ? (language === 'ko' ? '🚨 복합 누적 리스크 구역' : '🚨 Vùng Rủi Ro Kép Tích Lũy')
                       : selectedCell.zone === 'overstock'
-                      ? '📦 Vùng Nguy Cơ Ứ Đọng Tồn Kho'
+                      ? (language === 'ko' ? '📦 재고 과다 및 정체 구역' : '📦 Vùng Nguy Cơ Ứ Đọng Tồn Kho')
                       : selectedCell.zone === 'extra_order'
-                      ? '⚡ Vùng Phát Sinh Đơn Hàng Cao'
-                      : '✅ Vùng Vận Hành Ổn Định'}
+                      ? (language === 'ko' ? '⚡ 추가/긴급발주 과다 구역' : '⚡ Vùng Phát Sinh Đơn Hàng Cao')
+                      : (language === 'ko' ? '✅ 안정적 정상 운영 구역' : '✅ Vùng Vận Hành Ổn Định')}
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-[11px] text-slate-500">Số lượng đơn vị:</span>
+                  <span className="text-[11px] text-slate-500">{language === 'ko' ? '해당 급식소 수:' : 'Số lượng đơn vị:'}</span>
                   <div className="text-base font-black text-indigo-600">
-                    {selectedCell.canteens.length} Canteen
+                    {selectedCell.canteens.length} {language === 'ko' ? '개소' : 'Canteen'}
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <h5 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Danh sách Canteen trong ô này:
+                  {language === 'ko' ? '해당 셀 내 급식소 목록:' : 'Danh sách Canteen trong ô này:'}
                 </h5>
                 <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
                   {selectedCell.canteens.map((c) => (
@@ -1036,18 +1056,18 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
                         <div className="font-bold text-slate-900 flex items-center space-x-2">
                           <span>{c.canteen}</span>
                           <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600 font-mono">
-                            Điểm {c.cumulativeRiskScore}
+                            {language === 'ko' ? `점수 ${c.cumulativeRiskScore}` : `Điểm ${c.cumulativeRiskScore}`}
                           </span>
                         </div>
                         <div className="text-[11px] text-slate-500 mt-0.5">
-                          Tồn kho: <strong className="text-slate-700">{c.inventory_ratio_pct}%</strong> | Đặt quá mức: <strong className="text-slate-700">{c.extra_order_pct}%</strong>
+                          {language === 'ko' ? '재고율' : 'Tồn kho'}: <strong className="text-slate-700">{c.inventory_ratio_pct}%</strong> | {language === 'ko' ? '추가발주' : 'Đặt quá mức'}: <strong className="text-slate-700">{c.extra_order_pct}%</strong>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="font-mono text-slate-700 font-semibold">
                           {formatVND(c.ending_inventory_value)} ₫
                         </div>
-                        <span className="text-[10px] text-indigo-600 font-medium">Bấm soi chi tiết &rarr;</span>
+                        <span className="text-[10px] text-indigo-600 font-medium">{language === 'ko' ? '상세보기 →' : 'Bấm soi chi tiết →'}</span>
                       </div>
                     </div>
                   ))}
@@ -1060,7 +1080,7 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
                 onClick={() => setSelectedCell(null)}
                 className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
               >
-                Đóng
+                {language === 'ko' ? '닫기' : 'Đóng'}
               </button>
             </div>
           </div>
@@ -1079,10 +1099,10 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
                 </span>
                 <div>
                   <h4 className="text-base font-bold text-slate-900">
-                    Hồ sơ Rủi ro Vận hành: {selectedCanteenDetails.summary.canteen}
+                    {language === 'ko' ? `급식소 운영 리스크 프로필: ${selectedCanteenDetails.summary.canteen}` : `Hồ sơ Rủi ro Vận hành: ${selectedCanteenDetails.summary.canteen}`}
                   </h4>
                   <p className="text-xs text-slate-500">
-                    Đánh giá chi tiết tương quan Tồn kho, Đặt phát sinh &amp; Quy trình PR3
+                    {language === 'ko' ? '기말재고, 추가발주 및 PR3 절차 준수율 종합 진단' : 'Đánh giá chi tiết tương quan Tồn kho, Đặt phát sinh & Quy trình PR3'}
                   </p>
                 </div>
               </div>
@@ -1111,17 +1131,26 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
                 <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-current" />
                 <div className="space-y-1">
                   <div className="font-bold text-sm">
-                    Phân loại: {selectedCanteenDetails.summary.riskZoneTitle}
+                    {language === 'ko' ? `위험 분류: ${selectedCanteenDetails.summary.riskZoneTitle}` : `Phân loại: ${selectedCanteenDetails.summary.riskZoneTitle}`}
                   </div>
                   <p className="text-[11px] leading-relaxed opacity-90">
-                    {selectedCanteenDetails.summary.riskZone === 'critical' &&
-                      'Đơn vị đang tích lũy đồng thời 2 yếu tố rủi ro nghiêm trọng: Tồn kho vượt ngưỡng an toàn và liên tục đặt hàng phát sinh PR3. Cần kiểm toán lại định mức thực đơn và giải phóng hàng tồn ngay.'}
-                    {selectedCanteenDetails.summary.riskZone === 'overstock' &&
-                      'Đơn vị có lượng hàng tồn kho cao nhưng tỷ lệ đặt hàng phát sinh trong tầm kiểm soát. Cần ưu tiên luân chuyển nguyên liệu và xuất kho chế biến trước khi tạo đơn mới.'}
-                    {selectedCanteenDetails.summary.riskZone === 'extra_order' &&
-                      'Đơn vị có lượng đặt hàng phát sinh PR3 cao bất thường so với thực đơn kế hoạch. Cần kiểm tra nguyên nhân thay đổi thực đơn hoặc thiếu hụt nguyên vật liệu.'}
-                    {selectedCanteenDetails.summary.riskZone === 'safe' &&
-                      'Đơn vị duy trì kỷ luật vận hành rất tốt, tỷ lệ tồn kho và tỷ lệ đơn hàng phát sinh đều nằm trong hạn mức cho phép.'}
+                    {language === 'ko' ? (
+                      selectedCanteenDetails.summary.riskZone === 'critical'
+                        ? '재고 과다와 대량 추가발주가 동시 발생하는 심각한 복합 리스크 상태입니다. 메뉴 표준화 및 기존 재고 우선 소진 조치가 시급합니다.'
+                        : selectedCanteenDetails.summary.riskZone === 'overstock'
+                        ? '재고 보유율이 높으나 추가발주는 통제 범위 내에 있습니다. 신규 발주 전 기존 재고를 조리에 적극 투입하세요.'
+                        : selectedCanteenDetails.summary.riskZone === 'extra_order'
+                        ? '계획 외 추가발주(PR3) 비율이 비정상적으로 높습니다. 식단 변경 빈도와 식수 변동 원인을 점검하세요.'
+                        : '재고율과 추가발주율이 모두 규정 범위 내에서 안정적으로 통제되고 있습니다.'
+                    ) : (
+                      selectedCanteenDetails.summary.riskZone === 'critical'
+                        ? 'Đơn vị đang tích lũy đồng thời 2 yếu tố rủi ro nghiêm trọng: Tồn kho vượt ngưỡng an toàn và liên tục đặt hàng phát sinh PR3. Cần kiểm toán lại định mức thực đơn và giải phóng hàng tồn ngay.'
+                        : selectedCanteenDetails.summary.riskZone === 'overstock'
+                        ? 'Đơn vị có lượng hàng tồn kho cao nhưng tỷ lệ đặt hàng phát sinh trong tầm kiểm soát. Cần ưu tiên luân chuyển nguyên liệu và xuất kho chế biến trước khi tạo đơn mới.'
+                        : selectedCanteenDetails.summary.riskZone === 'extra_order'
+                        ? 'Đơn vị có lượng đặt hàng phát sinh PR3 cao bất thường so với thực đơn kế hoạch. Cần kiểm tra nguyên nhân thay đổi thực đơn hoặc thiếu hụt nguyên vật liệu.'
+                        : 'Đơn vị duy trì kỷ luật vận hành rất tốt, tỷ lệ tồn kho và tỷ lệ đơn hàng phát sinh đều nằm trong hạn mức cho phép.'
+                    )}
                   </p>
                 </div>
               </div>
@@ -1129,75 +1158,77 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
               {/* KPI Cards Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                  <span className="text-[10px] text-slate-500 font-medium">Tỷ lệ Tồn Kho</span>
-                  <div className="text-base font-bold text-slate-900 font-mono mt-0.5">
-                    {selectedCanteenDetails.summary.inventory_ratio_pct}%
+                  <span className="text-[10px] text-slate-500 font-medium">{language === 'ko' ? '재고 계수' : 'Hệ Số Tồn Kho'}</span>
+                  <div className="text-sm font-bold text-slate-900 font-mono mt-0.5">
+                    GR: {selectedCanteenDetails.summary.inventory_to_gr_ratio !== undefined ? selectedCanteenDetails.summary.inventory_to_gr_ratio.toFixed(2) : (selectedCanteenDetails.summary.ending_inventory_value / (selectedCanteenDetails.summary.gr_value || 1)).toFixed(2)}
                   </div>
-                  <span className="text-[10px] text-slate-400">Ngưỡng: &lt; {invHighThreshold}%</span>
+                  <span className="text-[10px] text-indigo-700 font-mono font-medium block">
+                    GI: {selectedCanteenDetails.summary.inventory_to_gi_ratio !== undefined ? selectedCanteenDetails.summary.inventory_to_gi_ratio.toFixed(2) : (selectedCanteenDetails.summary.ending_inventory_value / (selectedCanteenDetails.summary.gi_value || 1)).toFixed(2)} ({selectedCanteenDetails.summary.inventory_ratio_pct}%)
+                  </span>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                  <span className="text-[10px] text-slate-500 font-medium">Tỷ lệ Đặt Quá Mức</span>
+                  <span className="text-[10px] text-slate-500 font-medium">{language === 'ko' ? '추가발주 비율' : 'Tỷ lệ Đặt Quá Mức'}</span>
                   <div className="text-base font-bold text-slate-900 font-mono mt-0.5">
                     {selectedCanteenDetails.summary.extra_order_pct}%
                   </div>
-                  <span className="text-[10px] text-slate-400">Ngưỡng: &lt; {extraOrderHighThreshold}%</span>
+                  <span className="text-[10px] text-slate-400">{language === 'ko' ? `기준: < ${extraOrderHighThreshold}%` : `Ngưỡng: < ${extraOrderHighThreshold}%`}</span>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                  <span className="text-[10px] text-slate-500 font-medium">Tồn Kho / Suất Ăn</span>
+                  <span className="text-[10px] text-slate-500 font-medium">{language === 'ko' ? '1식당 재고' : 'Tồn Kho / Suất Ăn'}</span>
                   <div className="text-base font-bold text-indigo-700 font-mono mt-0.5">
                     {formatVND(selectedCanteenDetails.summary.inventory_value_per_meal)} ₫
                   </div>
-                  <span className="text-[10px] text-slate-400">Cuối kỳ</span>
+                  <span className="text-[10px] text-slate-400">{language === 'ko' ? '기말 환산' : 'Cuối kỳ'}</span>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                  <span className="text-[10px] text-slate-500 font-medium">Vi Phạm PR3 vs Suất</span>
+                  <span className="text-[10px] text-slate-500 font-medium">{language === 'ko' ? 'PR3 절차 위반' : 'Vi Phạm PR3 vs Suất'}</span>
                   <div className="text-base font-bold text-rose-600 font-mono mt-0.5">
-                    {selectedCanteenDetails.summary.pr3_mismatch_count} ngày
+                    {selectedCanteenDetails.summary.pr3_mismatch_count} {language === 'ko' ? '일' : 'ngày'}
                   </div>
-                  <span className="text-[10px] text-slate-400">Suất giảm nhưng PR3 tăng</span>
+                  <span className="text-[10px] text-slate-400">{language === 'ko' ? '식수 감소 시 PR3 증가' : 'Suất giảm nhưng PR3 tăng'}</span>
                 </div>
               </div>
 
               {/* Financial & Volume Summary */}
               <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200 space-y-2">
                 <div className="font-semibold text-slate-800 text-xs">
-                  Cân đối tài chính &amp; sản lượng bếp ăn:
+                  {language === 'ko' ? '재무 및 식수 수지 요약:' : 'Cân đối tài chính & sản lượng bếp ăn:'}
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
                   <div>
-                    <span className="text-slate-500">Giá trị tồn kho cuối kỳ:</span>
+                    <span className="text-slate-500">{language === 'ko' ? '기말 재고액:' : 'Giá trị tồn kho cuối kỳ:'}</span>
                     <div className="font-mono font-bold text-slate-800">
                       {formatVND(selectedCanteenDetails.summary.ending_inventory_value)} ₫
                     </div>
                   </div>
                   <div>
-                    <span className="text-slate-500">Tổng nhập kho (GR):</span>
+                    <span className="text-slate-500">{language === 'ko' ? '총 입고액 (GR):' : 'Tổng nhập kho (GR):'}</span>
                     <div className="font-mono font-bold text-slate-800">
                       {formatVND(selectedCanteenDetails.summary.gr_value)} ₫
                     </div>
                   </div>
                   <div>
-                    <span className="text-slate-500">Đơn hàng phát sinh (PR3):</span>
+                    <span className="text-slate-500">{language === 'ko' ? '추가발주액 (PR3):' : 'Đơn hàng phát sinh (PR3):'}</span>
                     <div className="font-mono font-bold text-slate-800">
                       {formatVND(selectedCanteenDetails.summary.pr3_value)} ₫
                     </div>
                   </div>
                   <div>
-                    <span className="text-slate-500">Số suất ăn xác nhận:</span>
+                    <span className="text-slate-500">{language === 'ko' ? '확정 식수:' : 'Số suất ăn xác nhận:'}</span>
                     <div className="font-mono font-bold text-slate-800">
-                      {selectedCanteenDetails.summary.confirmed_meals.toLocaleString('vi-VN')} suất
+                      {selectedCanteenDetails.summary.confirmed_meals.toLocaleString('vi-VN')} {language === 'ko' ? '식' : 'suất'}
                     </div>
                   </div>
                   <div>
-                    <span className="text-slate-500">Chi phí NVL / suất ăn:</span>
+                    <span className="text-slate-500">{language === 'ko' ? '1식당 재료비:' : 'Chi phí NVL / suất ăn:'}</span>
                     <div className="font-mono font-bold text-indigo-700">
                       {formatVND(selectedCanteenDetails.summary.material_cost_per_meal)} ₫
                     </div>
                   </div>
                   <div>
-                    <span className="text-slate-500">Số ngày rủi ro cao:</span>
+                    <span className="text-slate-500">{language === 'ko' ? '고위험 일수:' : 'Số ngày rủi ro cao:'}</span>
                     <div className="font-mono font-bold text-rose-600">
-                      {selectedCanteenDetails.summary.high_risk_days} / {selectedCanteenDetails.summary.total_days} ngày
+                      {selectedCanteenDetails.summary.high_risk_days} / {selectedCanteenDetails.summary.total_days} {language === 'ko' ? '일' : 'ngày'}
                     </div>
                   </div>
                 </div>
@@ -1210,7 +1241,7 @@ export const OperationalRiskHeatmap: React.FC<OperationalRiskHeatmapProps> = ({
                 onClick={() => setSelectedCanteen(null)}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors"
               >
-                Đóng hồ sơ
+                {language === 'ko' ? '프로필 닫기' : 'Đóng hồ sơ'}
               </button>
             </div>
           </div>

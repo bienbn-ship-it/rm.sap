@@ -20,6 +20,8 @@ export function exportAnalysisExcel(detail: CanteenRecord[], summary: CanteenSum
     'Doanh thu (VNĐ)': s.revenue,
     'Đặt vs Kế hoạch (%)': s.order_vs_plan_pct,
     'Tỷ lệ PR3 (%)': s.extra_order_pct,
+    'Hệ số Tồn kho / GR': s.inventory_to_gr_ratio !== undefined ? s.inventory_to_gr_ratio : Math.round(((s.ending_inventory_value / (s.gr_value || 1))) * 100) / 100,
+    'Hệ số Tồn kho / GI': s.inventory_to_gi_ratio !== undefined ? s.inventory_to_gi_ratio : Math.round(((s.ending_inventory_value / (s.gi_value || 1))) * 100) / 100,
     'Tồn kho / GR (%)': s.inventory_ratio_pct,
     'Chi phí NVL / suất (VNĐ)': s.material_cost_per_meal,
     'Tồn kho / suất (VNĐ)': s.inventory_value_per_meal,
@@ -28,7 +30,7 @@ export function exportAnalysisExcel(detail: CanteenRecord[], summary: CanteenSum
     'Điểm rủi ro TB': s.avg_risk_score,
     'Mức độ rủi ro': s.risk_level,
     'Số ngày rủi ro cao': s.high_risk_days,
-    'Số ca vi phạm quy trình PR3': s.pr3_mismatch_count,
+    'Số trường hợp vi phạm quy trình PR3': s.pr3_mismatch_count,
     'Tổng số ngày': s.total_days,
   }));
   const wsSummary = XLSX.utils.json_to_sheet(summaryData);
@@ -50,6 +52,8 @@ export function exportAnalysisExcel(detail: CanteenRecord[], summary: CanteenSum
     'Doanh thu': d.revenue,
     'GR vs Kế hoạch (%)': d.gr_vs_plan_pct,
     'Tỷ lệ PR3 (%)': d.extra_order_pct,
+    'Hệ số Tồn kho / GR': d.inventory_to_gr_ratio !== undefined ? d.inventory_to_gr_ratio : Math.round(((d.ending_inventory_value / (d.gr_value || 1))) * 100) / 100,
+    'Hệ số Tồn kho / GI': d.inventory_to_gi_ratio !== undefined ? d.inventory_to_gi_ratio : Math.round(((d.ending_inventory_value / (d.gi_value || 1))) * 100) / 100,
     'Tồn kho / GR (%)': d.inventory_ratio_pct,
     'Chi phí NVL/suất (VNĐ)': d.material_cost_per_meal,
     'Tồn kho / suất (VNĐ)': d.inventory_value_per_meal,

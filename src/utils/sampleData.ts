@@ -3,11 +3,11 @@ import { safeDiv } from './analytics';
 
 export function generateSampleData(): CanteenRecord[] {
   const canteens = [
-    { name: 'Canteen A - Samsung Thái Nguyên (SEVT)', baseMeals: 3200, mealPrice: 32000, baseCostPerMeal: 19500, riskTendency: 'low' },
-    { name: 'Canteen B - Foxconn KCN Quang Châu', baseMeals: 2100, mealPrice: 28000, baseCostPerMeal: 17200, riskTendency: 'medium' },
-    { name: 'Canteen C - Canon Quế Võ Bắc Ninh', baseMeals: 1500, mealPrice: 30000, baseCostPerMeal: 18500, riskTendency: 'high' },
-    { name: 'Canteen D - VinFast Đình Vũ Hải Phòng', baseMeals: 2800, mealPrice: 35000, baseCostPerMeal: 21000, riskTendency: 'low' },
-    { name: 'Canteen E - LG Innotek Tràng Duệ', baseMeals: 1800, mealPrice: 30000, baseCostPerMeal: 18800, riskTendency: 'medium' },
+    { name: 'Canteen A - Welstory 1', baseMeals: 3200, mealPrice: 32000, baseCostPerMeal: 19500, riskTendency: 'low' },
+    { name: 'Canteen B - Welstory 2', baseMeals: 2100, mealPrice: 28000, baseCostPerMeal: 17200, riskTendency: 'medium' },
+    { name: 'Canteen C - Welstory 3', baseMeals: 1500, mealPrice: 30000, baseCostPerMeal: 18500, riskTendency: 'high' },
+    { name: 'Canteen D - Welstory 4', baseMeals: 2800, mealPrice: 35000, baseCostPerMeal: 21000, riskTendency: 'low' },
+    { name: 'Canteen E - Welstory 5', baseMeals: 1800, mealPrice: 30000, baseCostPerMeal: 18800, riskTendency: 'medium' },
   ];
 
   const ingredientsPool = [
@@ -139,6 +139,8 @@ export function generateSampleData(): CanteenRecord[] {
         extra_order_pct: Math.round(safeDiv(pr3Value, totalOrderValue) * 1000) / 10,
         gr_vs_plan_pct: Math.round(safeDiv(grValue - menuPlanValue, menuPlanValue) * 1000) / 10,
         inventory_ratio_pct: Math.round(safeDiv(endingInventoryValue, grValue) * 1000) / 10,
+        inventory_to_gr_ratio: Math.round(safeDiv(endingInventoryValue, grValue) * 100) / 100,
+        inventory_to_gi_ratio: Math.round(safeDiv(endingInventoryValue, giValue) * 100) / 100,
         material_cost_per_meal: Math.round(safeDiv(giValue, confirmedMeals)),
         inventory_value_per_meal: Math.round(safeDiv(endingInventoryValue, confirmedMeals)),
         meal_gap: confirmedMeals - plannedMeals,

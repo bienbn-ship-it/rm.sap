@@ -1,5 +1,6 @@
 import React from 'react';
-import { Search, Filter, Calendar, RotateCcw, Check } from 'lucide-react';
+import { Search, Calendar, RotateCcw, Check } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface FilterBarProps {
   allCanteens: string[];
@@ -36,6 +37,15 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   filteredCount,
   totalCount,
 }) => {
+  const { t } = useLanguage();
+
+  const riskOptions = [
+    { id: 'Tất cả', label: t.filterAll },
+    { id: 'Thấp', label: t.filterLow },
+    { id: 'Trung bình', label: t.filterMedium },
+    { id: 'Cao', label: t.filterHigh },
+  ];
+
   return (
     <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-4 space-y-3.5">
       {/* Top row: Search, Date Range, Risk Level, Reset */}
@@ -45,7 +55,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Tìm theo canteen, nguyên liệu, cảnh báo..."
+            placeholder={t.filterSearchPlaceholder}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-slate-800"
@@ -74,23 +84,23 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {/* Risk Level Segmented */}
           <div className="flex items-center bg-slate-100 p-1 rounded-lg text-xs font-medium">
-            {['Tất cả', 'Thấp', 'Trung bình', 'Cao'].map((level) => (
+            {riskOptions.map((opt) => (
               <button
-                key={level}
-                onClick={() => onRiskFilterChange(level)}
+                key={opt.id}
+                onClick={() => onRiskFilterChange(opt.id)}
                 className={`px-2.5 py-1 rounded-md transition-all ${
-                  riskFilter === level
-                    ? level === 'Cao'
+                  riskFilter === opt.id
+                    ? opt.id === 'Cao'
                       ? 'bg-rose-600 text-white shadow-xs font-semibold'
-                      : level === 'Trung bình'
+                      : opt.id === 'Trung bình'
                       ? 'bg-amber-500 text-white shadow-xs font-semibold'
-                      : level === 'Thấp'
+                      : opt.id === 'Thấp'
                       ? 'bg-emerald-600 text-white shadow-xs font-semibold'
                       : 'bg-white text-slate-900 shadow-xs font-semibold'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {level}
+                {opt.label}
               </button>
             ))}
           </div>
@@ -99,7 +109,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <button
             onClick={onResetAll}
             className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-            title="Đặt lại tất cả bộ lọc"
+            title={t.filterReset}
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -111,24 +121,24 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-2">
             <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
-              Lọc theo Canteen ({selectedCanteens.length}/{allCanteens.length}):
+              {t.filterCanteenSelect} ({selectedCanteens.length}/{allCanteens.length}):
             </span>
             <button
               onClick={onSelectAllCanteens}
               className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
             >
-              Chọn tất cả
+              {t.filterSelectAll}
             </button>
             <span className="text-slate-300">•</span>
             <button
               onClick={onClearCanteens}
               className="text-xs text-slate-500 hover:text-slate-700 font-medium"
             >
-              Bỏ chọn
+              {t.filterDeselectAll}
             </button>
           </div>
           <div className="text-xs text-slate-500">
-            Hiển thị <span className="font-bold text-slate-800">{filteredCount}</span> / {totalCount} bản ghi
+            {t.filterShowing} <span className="font-bold text-slate-800">{filteredCount}</span> / {totalCount} {t.filterRecords}
           </div>
         </div>
 

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { REQUIRED_CORE, mapColumns } from '../utils/normalize';
 import { downloadSampleTemplate } from '../utils/exportExcel';
+import { useLanguage } from '../context/LanguageContext';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   onDataLoaded,
   onLoadSample,
 }) => {
+  const { language, t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -35,6 +37,8 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   const [sheetNames, setSheetNames] = useState<string[]>([]);
   const [selectedSheet, setSelectedSheet] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
+
+  const isKo = language === 'ko';
 
   if (!isOpen) return null;
 
@@ -55,7 +59,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           const raw = XLSX.utils.sheet_to_json(wb.Sheets[firstSheet]);
           processData(raw, file.name);
         } catch (err: any) {
-          setErrorMsg('Lỗi đọc file CSV: ' + (err.message || 'File không hợp lệ'));
+          setErrorMsg(isKo ? 'CSV 파일 읽기 오류: ' + (err.message || '유효하지 않은 파일') : 'Lỗi đọc file CSV: ' + (err.message || 'File không hợp lệ'));
         }
       };
       reader.readAsText(file);
@@ -72,7 +76,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           const raw = XLSX.utils.sheet_to_json(wb.Sheets[defaultSheet]);
           processData(raw, file.name);
         } catch (err: any) {
-          setErrorMsg('Lỗi đọc file Excel: ' + (err.message || 'File không hợp lệ'));
+          setErrorMsg(isKo ? 'Excel 파일 읽기 오류: ' + (err.message || '유효하지 않은 파일') : 'Lỗi đọc file Excel: ' + (err.message || 'File không hợp lệ'));
         }
       };
       reader.readAsArrayBuffer(file);
@@ -89,7 +93,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
   const processData = (rawRows: any[], name: string) => {
     if (!rawRows || rawRows.length === 0) {
-      setErrorMsg('File rỗng hoặc không có dòng dữ liệu hợp lệ.');
+      setErrorMsg(isKo ? '파일이 비어 있거나 유효한 데이터 행이 없습니다.' : 'File rỗng hoặc không có dòng dữ liệu hợp lệ.');
       return;
     }
 
@@ -99,7 +103,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     const { missing } = mapColumns(headers);
     if (missing.length > 0) {
       setMissingColumns(missing);
-      setErrorMsg(`Thiếu ${missing.length} cột bắt buộc trong file dữ liệu.`);
+      setErrorMsg(isKo ? `데이터 파일에 필수 열 ${missing.length}개가 누락되었습니다.` : `Thiếu ${missing.length} cột bắt buộc trong file dữ liệu.`);
       return;
     }
 
@@ -119,10 +123,10 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">
-                Nạp Dữ Liệu Bếp Ăn / Canteen
+                {t.uploadModalTitle}
               </h3>
               <p className="text-xs text-slate-500">
-                Hỗ trợ định dạng Excel (.xlsx, .xls) và file văn bản (.csv)
+                {t.uploadModalDesc}
               </p>
             </div>
           </div>
@@ -169,10 +173,10 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               <FileSpreadsheet className="w-7 h-7" />
             </div>
             <p className="text-sm font-semibold text-slate-800">
-              Kéo & thả file vào đây, hoặc click để chọn file
+              {t.uploadDropText}
             </p>
             <p className="text-xs text-slate-500 mt-1">
-              Hỗ trợ tự động nhận diện cả tiếng Việt có dấu, không dấu và tiếng Anh
+              {isKo ? '한국어/베트남어/영어 컬럼명 자동 매핑 지원' : 'Hỗ trợ tự động nhận diện cả tiếng Việt có dấu, không dấu và tiếng Anh'}
             </p>
           </div>
 
@@ -180,7 +184,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           {sheetNames.length > 1 && (
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase">
-                Chọn Sheet chứa dữ liệu trong file:
+                {isKo ? '파일 내 데이터가 포함된 시트 선택:' : 'Chọn Sheet chứa dữ liệu trong file:'}
               </label>
               <select
                 value={selectedSheet}
@@ -189,7 +193,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               >
                 {sheetNames.map((name) => (
                   <option key={name} value={name}>
-                    Sheet: {name}
+                    {isKo ? `시트: ${name}` : `Sheet: ${name}`}
                   </option>
                 ))}
               </select>
@@ -205,7 +209,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                   <p className="font-semibold">{errorMsg}</p>
                   {missingColumns.length > 0 && (
                     <div className="mt-2">
-                      <p className="font-medium text-rose-900">Các cột còn thiếu:</p>
+                      <p className="font-medium text-rose-900">{isKo ? '누락된 필수 열:' : 'Các cột còn thiếu:'}</p>
                       <div className="flex flex-wrap gap-1.5 mt-1">
                         {missingColumns.map((col) => (
                           <span
@@ -220,7 +224,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                   )}
                   {detectedColumns.length > 0 && (
                     <p className="mt-2 text-rose-700 text-xs">
-                      Cột hiện có trong file: {detectedColumns.join(', ')}
+                      {isKo ? `현재 파일의 열 목록: ${detectedColumns.join(', ')}` : `Cột hiện có trong file: ${detectedColumns.join(', ')}`}
                     </p>
                   )}
                 </div>
@@ -232,13 +236,25 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           <div className="bg-slate-50 rounded-xl p-4 border border-slate-200/80 text-xs text-slate-600 space-y-2">
             <div className="flex items-center space-x-1.5 font-semibold text-slate-800">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>11 Cột lõi hệ thống tự động nhận diện:</span>
+              <span>{isKo ? '시스템 자동 인식 11개 핵심 열:' : '11 Cột lõi hệ thống tự động nhận diện:'}</span>
             </div>
             <p className="leading-relaxed">
-              <strong>Ngày</strong> (date), <strong>Canteen</strong> (nha_an, site), <strong>Kế hoạch Menu</strong> (menu_plan_value), <strong>PR1</strong> (đặt chuẩn), <strong>PR3</strong> (đặt phát sinh), <strong>GR</strong> (nhập kho), <strong>GI</strong> (xuất kho), <strong>Tồn kho cuối</strong> (ending_inventory), <strong>Suất kế hoạch</strong> (planned_meals), <strong>Suất confirm</strong> (confirmed_meals), <strong>Doanh thu</strong> (revenue).
+              {isKo ? (
+                <>
+                  <strong>일자</strong> (date), <strong>급식소명</strong> (canteen, site), <strong>메뉴 계획액</strong> (menu_plan_value), <strong>PR1 정규발주</strong> (pr1), <strong>PR3 추가발주</strong> (pr3), <strong>GR 입고액</strong> (gr), <strong>GI 출고액</strong> (gi), <strong>기말재고</strong> (ending_inventory), <strong>계획식수</strong> (planned_meals), <strong>확정식수</strong> (confirmed_meals), <strong>매출액</strong> (revenue).
+                </>
+              ) : (
+                <>
+                  <strong>Ngày</strong> (date), <strong>Canteen</strong> (nha_an, site), <strong>Kế hoạch Menu</strong> (menu_plan_value), <strong>PR1</strong> (đặt chuẩn), <strong>PR3</strong> (đặt phát sinh), <strong>GR</strong> (nhập kho), <strong>GI</strong> (xuất kho), <strong>Tồn kho cuối</strong> (ending_inventory), <strong>Suất kế hoạch</strong> (planned_meals), <strong>Suất confirm</strong> (confirmed_meals), <strong>Doanh thu</strong> (revenue).
+                </>
+              )}
             </p>
             <p className="text-slate-500 pt-1 border-t border-slate-200">
-              💡 <em>Khuyến nghị thêm các cột để kích hoạt cảnh báo HSD:</em> Nguyên liệu (ingredient), Hạn sử dụng (expiry_date), Số lượng tồn (inventory_qty).
+              {isKo ? (
+                <>💡 <em>유통기한 경고를 활성화하기 위한 권장 열:</em> 식자재명 (ingredient), 유통기한 (expiry_date), 재고수량 (inventory_qty).</>
+              ) : (
+                <>💡 <em>Khuyến nghị thêm các cột để kích hoạt cảnh báo HSD:</em> Nguyên liệu (ingredient), Hạn sử dụng (expiry_date), Số lượng tồn (inventory_qty).</>
+              )}
             </p>
           </div>
 
@@ -250,7 +266,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               className="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 rounded-xl border border-slate-300 flex items-center justify-center space-x-2 transition-colors"
             >
               <Download className="w-4 h-4 text-slate-500" />
-              <span>Tải file Excel mẫu (.xlsx)</span>
+              <span>{language === 'ko' ? '표준 엑셀 서식 다운로드 (.xlsx)' : 'Tải file Excel mẫu (.xlsx)'}</span>
             </button>
 
             <button
@@ -262,7 +278,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               className="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-xl border border-indigo-200 flex items-center justify-center space-x-2 transition-colors"
             >
               <Sparkles className="w-4 h-4 text-indigo-600" />
-              <span>Dùng ngay dữ liệu mẫu (5 Canteen)</span>
+              <span>{language === 'ko' ? '샘플 데이터 즉시 불러오기 (5개 급식소)' : 'Dùng ngay dữ liệu mẫu (5 Canteen)'}</span>
             </button>
           </div>
         </div>

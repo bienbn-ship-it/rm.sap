@@ -15,6 +15,7 @@ import { TabRawData } from './components/TabRawData';
 import { ThresholdSettings } from './components/ThresholdSettings';
 import { UploadModal } from './components/UploadModal';
 import { FormulaGuideModal } from './components/FormulaGuideModal';
+import { ExportReportModal } from './components/ExportReportModal';
 
 import { 
   LayoutDashboard, 
@@ -28,7 +29,10 @@ import {
   Download
 } from 'lucide-react';
 
+import { useLanguage } from './context/LanguageContext';
+
 export default function App() {
+  const { t } = useLanguage();
   const [thresholds, setThresholds] = useState<RiskThresholds>(DEFAULT_THRESHOLDS);
   const [records, setRecords] = useState<CanteenRecord[]>([]);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'trends' | 'risk' | 'raw'>('dashboard');
@@ -37,6 +41,7 @@ export default function App() {
   const [isUploadOpen, setIsUploadOpen] = useState<boolean>(false);
   const [isThresholdsOpen, setIsThresholdsOpen] = useState<boolean>(false);
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
+  const [isVisualReportOpen, setIsVisualReportOpen] = useState<boolean>(false);
 
   // Filters
   const [selectedCanteens, setSelectedCanteens] = useState<string[]>([]);
@@ -106,6 +111,8 @@ export default function App() {
       const extra_order_pct = Math.round(safeDiv(pr3_value, total_order_value) * 1000) / 10;
       const gr_vs_plan_pct = Math.round(safeDiv(gr_value - menu_plan_value, menu_plan_value) * 1000) / 10;
       const inventory_ratio_pct = Math.round(safeDiv(ending_inventory_value, gr_value) * 1000) / 10;
+      const inventory_to_gr_ratio = Math.round(safeDiv(ending_inventory_value, gr_value) * 100) / 100;
+      const inventory_to_gi_ratio = Math.round(safeDiv(ending_inventory_value, gi_value) * 100) / 100;
       const material_cost_per_meal = Math.round(safeDiv(gi_value, confirmed_meals));
       const inventory_value_per_meal = Math.round(safeDiv(ending_inventory_value, confirmed_meals));
       const meal_gap = confirmed_meals - planned_meals;
@@ -135,6 +142,8 @@ export default function App() {
         extra_order_pct,
         gr_vs_plan_pct,
         inventory_ratio_pct,
+        inventory_to_gr_ratio,
+        inventory_to_gi_ratio,
         material_cost_per_meal,
         inventory_value_per_meal,
         meal_gap,
@@ -280,6 +289,7 @@ export default function App() {
         onOpenThresholds={() => setIsThresholdsOpen(true)}
         onOpenGuide={() => setIsGuideOpen(true)}
         onExportExcel={handleExportExcel}
+        onOpenVisualReport={() => setIsVisualReportOpen(true)}
         onDownloadTemplate={downloadSampleTemplate}
         hasData={records.length > 0}
         totalRecords={records.length}
@@ -324,7 +334,7 @@ export default function App() {
               }`}
             >
               <LayoutDashboard className="w-4 h-4" />
-              <span>Dashboard Canteen</span>
+              <span>{t.tabDashboard}</span>
               <span className="text-[11px] bg-slate-200/80 text-slate-700 px-2 py-0.5 rounded-full font-mono">
                 {summaries.length}
               </span>
@@ -339,7 +349,7 @@ export default function App() {
               }`}
             >
               <TrendingUp className="w-4 h-4" />
-              <span>Xu hướng & Bất thường (Anomaly)</span>
+              <span>{t.tabTrends}</span>
               {filteredRecords.some((r) => r.cost_per_meal_anomaly) && (
                 <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
               )}
@@ -354,7 +364,7 @@ export default function App() {
               }`}
             >
               <ShieldAlert className="w-4 h-4" />
-              <span>Rủi ro & Cảnh báo HSD</span>
+              <span>{t.tabRisk}</span>
               {kpiData.highRiskCount > 0 && (
                 <span className="text-[11px] bg-rose-100 text-rose-700 px-1.5 py-0.2 rounded-full font-bold">
                   {kpiData.highRiskCount}
@@ -371,7 +381,7 @@ export default function App() {
               }`}
             >
               <Database className="w-4 h-4" />
-              <span>Dữ liệu chi tiết</span>
+              <span>{t.tabRaw}</span>
               <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-mono">
                 {filteredRecords.length}
               </span>
@@ -381,7 +391,12 @@ export default function App() {
 
         {/* Tab Views */}
         {activeTab === 'dashboard' && (
-          <TabDashboard summary={summaries} records={filteredRecords} thresholds={thresholds} />
+          <TabDashboard 
+            summary={summaries} 
+            records={filteredRecords} 
+            thresholds={thresholds} 
+            onOpenVisualReport={() => setIsVisualReportOpen(true)}
+          />
         )}
 
         {activeTab === 'trends' && (
@@ -401,16 +416,16 @@ export default function App() {
       <footer className="mt-auto border-t border-slate-200/80 bg-white py-4 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div>
-            Canteen Risk Analytics • Hệ thống quản trị định mức, rủi ro thu mua & an toàn thực phẩm
+            {t.footerCopyright}
           </div>
           <div className="flex items-center space-x-3 text-slate-400">
-            <span>Robust Z-Score Anomaly Engine</span>
+            <span>{t.footerAlgorithm}</span>
             <span>•</span>
             <button
               onClick={() => setIsGuideOpen(true)}
               className="text-indigo-600 hover:underline"
             >
-              Hướng dẫn thuật toán
+              {t.btnGuide}
             </button>
           </div>
         </div>
@@ -434,6 +449,18 @@ export default function App() {
       <FormulaGuideModal
         isOpen={isGuideOpen}
         onClose={() => setIsGuideOpen(false)}
+      />
+
+      <ExportReportModal
+        isOpen={isVisualReportOpen}
+        onClose={() => setIsVisualReportOpen(false)}
+        summary={summaries}
+        records={filteredRecords}
+        dateStart={dateStart}
+        dateEnd={dateEnd}
+        selectedCanteens={selectedCanteens}
+        thresholds={thresholds}
+        onExportExcel={handleExportExcel}
       />
     </div>
   );

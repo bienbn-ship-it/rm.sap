@@ -19,6 +19,7 @@ import {
   ArrowUpDown,
   Info
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface CostPerMealBarChartProps {
   summary: CanteenSummary[];
@@ -33,6 +34,8 @@ export const CostPerMealBarChart: React.FC<CostPerMealBarChartProps> = ({
   records = [],
   thresholds,
 }) => {
+  const { language } = useLanguage();
+  const isKo = language === 'ko';
   const [sortOption, setSortOption] = useState<SortOption>('cost_desc');
   const [filterAnomalyOnly, setFilterAnomalyOnly] = useState<boolean>(false);
   const [selectedCanteen, setSelectedCanteen] = useState<string | null>(null);
@@ -169,7 +172,7 @@ export const CostPerMealBarChart: React.FC<CostPerMealBarChartProps> = ({
             </div>
 
             <div className="flex justify-between items-center text-[11px]">
-              <span className="text-slate-400">So với TB toàn hệ thống:</span>
+              <span className="text-slate-400">{isKo ? '전체 시스템 평균 대비:' : 'So với TB toàn hệ thống:'}</span>
               <span
                 className={`font-semibold ${
                   data.diffPct > 0 ? 'text-rose-400' : 'text-emerald-400'
@@ -180,21 +183,21 @@ export const CostPerMealBarChart: React.FC<CostPerMealBarChartProps> = ({
             </div>
 
             <div className="flex justify-between items-center text-[11px]">
-              <span className="text-slate-400">Suất ăn xác nhận:</span>
+              <span className="text-slate-400">{isKo ? '확정 식수:' : 'Suất ăn xác nhận:'}</span>
               <span className="font-mono text-slate-200">
-                {data.confirmed_meals.toLocaleString('vi-VN')} suất
+                {data.confirmed_meals.toLocaleString('vi-VN')} {isKo ? '식' : 'suất'}
               </span>
             </div>
 
             <div className="flex justify-between items-center text-[11px]">
-              <span className="text-slate-400">Tổng chi phí xuất kho (GI):</span>
+              <span className="text-slate-400">{isKo ? '총 출고액 (GI):' : 'Tổng chi phí xuất kho (GI):'}</span>
               <span className="font-mono text-slate-200">
                 {formatVND(data.gi_value)} ₫
               </span>
             </div>
 
             <div className="flex justify-between items-center text-[11px]">
-              <span className="text-slate-400">Tồn kho / suất:</span>
+              <span className="text-slate-400">{isKo ? '1식당 재고:' : 'Tồn kho / suất:'}</span>
               <span className="font-mono text-indigo-300 font-semibold">
                 {formatVND(data.inventory_value_per_meal)} ₫
               </span>
@@ -205,14 +208,14 @@ export const CostPerMealBarChart: React.FC<CostPerMealBarChartProps> = ({
           {data.hasAnomaly && (
             <div className="pt-2 border-t border-slate-800 text-[11px] text-rose-300 flex items-center space-x-1.5">
               <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-              <span>Phát hiện {data.anomalyCount} ca dị biệt Z-Score (|Z| &ge; 3.5)</span>
+              <span>{isKo ? `Z-Score 이상치 ${data.anomalyCount}건 감지 (|Z| ≥ 3.5)` : `Phát hiện ${data.anomalyCount} trường hợp dị biệt Z-Score (|Z| ≥ 3.5)`}</span>
             </div>
           )}
 
           {data.isHigh && !data.hasAnomaly && (
             <div className="pt-2 border-t border-slate-800 text-[11px] text-amber-300 flex items-center space-x-1.5">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>Vượt ngưỡng cảnh báo ({formatVND(warningThreshold)} ₫)</span>
+              <span>{isKo ? `경고 기준 초과 (${formatVND(warningThreshold)} ₫)` : `Vượt ngưỡng cảnh báo (${formatVND(warningThreshold)} ₫)`}</span>
             </div>
           )}
         </div>
@@ -232,15 +235,15 @@ export const CostPerMealBarChart: React.FC<CostPerMealBarChartProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
-                <span>Phân Phối Chi Phí NVL / Suất Ăn Theo Canteen (Recharts)</span>
+                <span>{isKo ? '급식소별 1식당 식재료비 분포 비교' : 'Phân Phối Chi Phí NVL / Suất Ăn Theo Canteen (Recharts)'}</span>
                 {anomalyCountTotal > 0 && (
                   <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200">
-                    {anomalyCountTotal} đơn vị cần rà soát
+                    {anomalyCountTotal} {isKo ? '개 급식소 확인 요망' : 'đơn vị cần rà soát'}
                   </span>
                 )}
               </h3>
               <p className="text-xs text-slate-500">
-                Biểu đồ cột so sánh chi phí xuất kho bình quân trên mỗi suất confirm giữa các Canteen, kèm chuẩn định mức hệ thống
+                {isKo ? '급식소별 확정 1식당 평균 출고 식재료비 비교 및 시스템 표준 벤치마크선' : 'Biểu đồ cột so sánh chi phí xuất kho bình quân trên mỗi suất confirm giữa các Canteen, kèm chuẩn định mức hệ thống'}
               </p>
             </div>
           </div>
@@ -258,41 +261,41 @@ export const CostPerMealBarChart: React.FC<CostPerMealBarChartProps> = ({
             }`}
           >
             <Filter className="w-3.5 h-3.5" />
-            <span>Chỉ xem chi phí cao/bất thường</span>
+            <span>{isKo ? '고비용 / 이상치만 조회' : 'Chỉ xem chi phí cao/bất thường'}</span>
           </button>
 
           {/* Sort Selector */}
           <div className="inline-flex items-center space-x-1 bg-white border border-slate-200 rounded-lg p-0.5">
             <span className="pl-2 pr-1 text-[11px] text-slate-400 flex items-center">
               <ArrowUpDown className="w-3 h-3 mr-1" />
-              Sắp xếp:
+              {isKo ? '정렬:' : 'Sắp xếp:'}
             </span>
             <button
               onClick={() => setSortOption('cost_desc')}
               className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
                 sortOption === 'cost_desc' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-600 hover:bg-slate-100'
               }`}
-              title="Chi phí cao nhất xếp trước"
+              title={isKo ? '높은 비용순' : 'Chi phí cao nhất xếp trước'}
             >
-              Cao nhất trước
+              {isKo ? '최고비용순' : 'Cao nhất trước'}
             </button>
             <button
               onClick={() => setSortOption('cost_asc')}
               className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
                 sortOption === 'cost_asc' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-600 hover:bg-slate-100'
               }`}
-              title="Chi phí thấp nhất xếp trước"
+              title={isKo ? '낮은 비용순' : 'Chi phí thấp nhất xếp trước'}
             >
-              Thấp nhất trước
+              {isKo ? '최저비용순' : 'Thấp nhất trước'}
             </button>
             <button
               onClick={() => setSortOption('name')}
               className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
                 sortOption === 'name' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-600 hover:bg-slate-100'
               }`}
-              title="Theo tên A-Z"
+              title={isKo ? '이름순 (가나다/A-Z)' : 'Theo tên A-Z'}
             >
-              Tên A-Z
+              {isKo ? '이름순' : 'Tên A-Z'}
             </button>
           </div>
         </div>
@@ -301,25 +304,25 @@ export const CostPerMealBarChart: React.FC<CostPerMealBarChartProps> = ({
       {/* KPI Highlight Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-50/70 border-b border-slate-200/80 text-xs">
         <div className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs">
-          <span className="text-slate-500 block mb-0.5 text-[11px]">Định mức TB Hệ Thống:</span>
+          <span className="text-slate-500 block mb-0.5 text-[11px]">{isKo ? '시스템 전체 평균:' : 'Định mức TB Hệ Thống:'}</span>
           <div className="flex items-baseline space-x-1">
             <span className="text-lg font-bold font-mono text-indigo-700">{formatVND(systemAvgCost)} ₫</span>
-            <span className="text-[10px] text-slate-400">/ suất</span>
+            <span className="text-[10px] text-slate-400">/ {isKo ? '식' : 'suất'}</span>
           </div>
-          <p className="text-[10px] text-slate-500 mt-0.5">Chuẩn tham chiếu đối soát</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">{isKo ? '비교 기준 벤치마크' : 'Chuẩn tham chiếu đối soát'}</p>
         </div>
 
         <div className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs">
-          <span className="text-slate-500 block mb-0.5 text-[11px]">Ngưỡng Cảnh Báo Đỏ:</span>
+          <span className="text-slate-500 block mb-0.5 text-[11px]">{isKo ? '위험 경고 기준선:' : 'Ngưỡng Cảnh Báo Đỏ:'}</span>
           <div className="flex items-baseline space-x-1">
             <span className="text-lg font-bold font-mono text-rose-600">&gt; {formatVND(warningThreshold)} ₫</span>
-            <span className="text-[10px] text-slate-400">/ suất</span>
+            <span className="text-[10px] text-slate-400">/ {isKo ? '식' : 'suất'}</span>
           </div>
-          <p className="text-[10px] text-rose-600 font-medium mt-0.5">+15% so với trung bình</p>
+          <p className="text-[10px] text-rose-600 font-medium mt-0.5">{isKo ? '평균 대비 +15% 초과' : '+15% so với trung bình'}</p>
         </div>
 
         <div className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs">
-          <span className="text-slate-500 block mb-0.5 text-[11px]">Đơn Vị Chi Phí Cao Nhất:</span>
+          <span className="text-slate-500 block mb-0.5 text-[11px]">{isKo ? '최고 비용 급식소:' : 'Đơn Vị Chi Phí Cao Nhất:'}</span>
           <div className="truncate font-semibold text-slate-800 text-xs" title={maxItem?.canteen}>
             {maxItem ? maxItem.canteen : 'N/A'}
           </div>
@@ -329,7 +332,7 @@ export const CostPerMealBarChart: React.FC<CostPerMealBarChartProps> = ({
         </div>
 
         <div className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs">
-          <span className="text-slate-500 block mb-0.5 text-[11px]">Đơn Vị Tiết Kiệm Nhất:</span>
+          <span className="text-slate-500 block mb-0.5 text-[11px]">{isKo ? '최저 비용 급식소:' : 'Đơn Vị Tiết Kiệm Nhất:'}</span>
           <div className="truncate font-semibold text-slate-800 text-xs" title={minItem?.canteen}>
             {minItem ? minItem.canteen : 'N/A'}
           </div>
@@ -481,52 +484,60 @@ export const CostPerMealBarChart: React.FC<CostPerMealBarChartProps> = ({
                       : 'bg-emerald-100 text-emerald-800'
                   }`}
                 >
-                  Mức rủi ro: {activeDetail.risk_level} ({activeDetail.avg_risk_score} điểm)
+                  {isKo ? '위험 수준:' : 'Mức rủi ro:'}{' '}
+                  {isKo
+                    ? activeDetail.risk_level === 'Cao'
+                      ? '고위험'
+                      : activeDetail.risk_level === 'Trung bình'
+                      ? '중위험'
+                      : '저위험'
+                    : activeDetail.risk_level}{' '}
+                  ({activeDetail.avg_risk_score} {isKo ? '점' : 'điểm'})
                 </span>
                 {activeDetail.hasAnomaly && (
                   <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700 border border-rose-300">
-                    ⚠️ Dị biệt Z-Score
+                    {isKo ? '⚠️ Z-점수 이상치' : '⚠️ Dị biệt Z-Score'}
                   </span>
                 )}
               </div>
               <button
                 onClick={() => setSelectedCanteen(null)}
-                className="text-slate-400 hover:text-slate-600 text-xs"
+                className="text-slate-400 hover:text-slate-600 text-xs font-medium cursor-pointer"
               >
-                ✕ Đóng
+                {isKo ? '✕ 닫기' : '✕ Đóng'}
               </button>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white p-3 rounded-lg border border-indigo-100">
               <div>
-                <span className="text-slate-500 block">Chi phí NVL / Suất:</span>
+                <span className="text-slate-500 block">{isKo ? '식수당 식자재비:' : 'Chi phí NVL / Suất:'}</span>
                 <span className="font-mono font-bold text-sm text-indigo-900">
                   {formatVND(activeDetail.material_cost_per_meal)} ₫
                 </span>
                 <span className={`block text-[10px] font-medium ${activeDetail.diffPct > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                  {activeDetail.diffPct > 0 ? `+${activeDetail.diffPct}%` : `${activeDetail.diffPct}%`} vs mức TB
+                  {activeDetail.diffPct > 0 ? `+${activeDetail.diffPct}%` : `${activeDetail.diffPct}%`} {isKo ? '평균 대비' : 'vs mức TB'}
                 </span>
               </div>
               <div>
-                <span className="text-slate-500 block">Tồn kho / Suất ăn:</span>
+                <span className="text-slate-500 block">{isKo ? '식수당 재고금액:' : 'Tồn kho / Suất ăn:'}</span>
                 <span className={`font-mono font-bold text-sm ${activeDetail.inventory_value_per_meal > 15000 ? 'text-rose-600' : 'text-slate-800'}`}>
                   {formatVND(activeDetail.inventory_value_per_meal)} ₫
                 </span>
-                <span className="text-[10px] text-slate-400 block">Định mức an toàn: 15.000 ₫</span>
+                <span className="text-[10px] text-slate-400 block">{isKo ? '안전 기준: 15,000 ₫' : 'Định mức an toàn: 15.000 ₫'}</span>
               </div>
               <div>
-                <span className="text-slate-500 block">Tổng Suất Confirm:</span>
+                <span className="text-slate-500 block">{isKo ? '총 확정 식수:' : 'Tổng Suất Confirm:'}</span>
                 <span className="font-mono font-bold text-sm text-slate-800">
-                  {activeDetail.confirmed_meals.toLocaleString('vi-VN')}
+                  {activeDetail.confirmed_meals.toLocaleString(isKo ? 'ko-KR' : 'vi-VN')}
                 </span>
-                <span className="text-[10px] text-slate-400 block">suất đã phục vụ</span>
+                <span className="text-[10px] text-slate-400 block">{isKo ? '제공된 총 식수' : 'suất đã phục vụ'}</span>
               </div>
               <div>
-                <span className="text-slate-500 block">Vi phạm QT PR3:</span>
+                <span className="text-slate-500 block">{isKo ? 'PR3 프로세스 위반:' : 'Vi phạm QT PR3:'}</span>
                 <span className={`font-mono font-bold text-sm ${activeDetail.pr3_mismatch_count > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                  {activeDetail.pr3_mismatch_count} ca
+                  {activeDetail.pr3_mismatch_count} {isKo ? '건' : 'Trường hợp'}
                 </span>
-                <span className="text-[10px] text-slate-400 block">Suất giảm nhưng PR3 tăng</span>
+                <span className="text-[10px] text-slate-400 block">{isKo ? '식수 감소에도 PR3 증가' : 'Suất giảm nhưng PR3 tăng'}</span>
               </div>
             </div>
           </div>

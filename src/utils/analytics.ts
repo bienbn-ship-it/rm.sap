@@ -130,6 +130,10 @@ export function scoreRisks(records: CanteenRecord[], thresholds: RiskThresholds)
       let points = 0;
       const reasons: string[] = [];
 
+      // Calculate coefficients
+      item.inventory_to_gr_ratio = Math.round(safeDiv(item.ending_inventory_value, item.gr_value) * 100) / 100;
+      item.inventory_to_gi_ratio = Math.round(safeDiv(item.ending_inventory_value, item.gi_value) * 100) / 100;
+
       // Rule 1: GR cao hơn kế hoạch
       if (item.gr_vs_plan_pct > thresholds.gr_over_plan_high) {
         points += 20;
@@ -309,6 +313,8 @@ export function summarizeByCanteen(records: CanteenRecord[]): CanteenSummary[] {
       order_vs_plan_pct: Math.round(safeDiv(totalOrder - sumMenuPlan, sumMenuPlan) * 1000) / 10,
       extra_order_pct: Math.round(safeDiv(sumPr3, totalOrder) * 1000) / 10,
       inventory_ratio_pct: Math.round(safeDiv(endingInventory, sumGr) * 1000) / 10,
+      inventory_to_gr_ratio: Math.round(safeDiv(endingInventory, sumGr) * 100) / 100,
+      inventory_to_gi_ratio: Math.round(safeDiv(endingInventory, sumGi) * 100) / 100,
       material_cost_per_meal: Math.round(safeDiv(sumGi, sumConfirmedMeals)),
       inventory_value_per_meal: Math.round(safeDiv(endingInventory, sumConfirmedMeals)),
       meal_gap: mealGap,

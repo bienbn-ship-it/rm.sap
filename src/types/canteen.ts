@@ -26,6 +26,8 @@ export interface CanteenRecord {
   extra_order_pct: number;
   gr_vs_plan_pct: number;
   inventory_ratio_pct: number;
+  inventory_to_gr_ratio: number;
+  inventory_to_gi_ratio: number;
   material_cost_per_meal: number;
   inventory_value_per_meal: number;
   meal_gap: number;
@@ -65,6 +67,8 @@ export interface CanteenSummary {
   order_vs_plan_pct: number;
   extra_order_pct: number;
   inventory_ratio_pct: number;
+  inventory_to_gr_ratio: number;
+  inventory_to_gi_ratio: number;
   material_cost_per_meal: number;
   inventory_value_per_meal: number;
   meal_gap: number;

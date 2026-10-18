@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CanteenRecord } from '../types/canteen';
 import { PieChart, ShieldAlert, ShieldCheck, AlertTriangle, Info } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface RiskDonutChartProps {
   records: CanteenRecord[];
@@ -21,6 +22,8 @@ interface RiskSlice {
 }
 
 export const RiskDonutChart: React.FC<RiskDonutChartProps> = ({ records }) => {
+  const { language } = useLanguage();
+  const isKo = language === 'ko';
   const [activeLevel, setActiveLevel] = useState<'Cao' | 'Trung bình' | 'Thấp' | null>(null);
 
   const total = records.length;
@@ -37,7 +40,7 @@ export const RiskDonutChart: React.FC<RiskDonutChartProps> = ({ records }) => {
   const slices: RiskSlice[] = [
     {
       level: 'Cao',
-      label: 'Rủi ro Cao',
+      label: isKo ? '경고 (고위험)' : 'Rủi ro Cao',
       count: highList.length,
       percentage: total > 0 ? (highList.length / total) * 100 : 0,
       color: '#f43f5e', // rose-500
@@ -45,12 +48,12 @@ export const RiskDonutChart: React.FC<RiskDonutChartProps> = ({ records }) => {
       bgBadge: 'bg-rose-50',
       textBadge: 'text-rose-700',
       borderBadge: 'border-rose-200',
-      description: 'Điểm 60 - 100 • Cần can thiệp khẩn cấp',
+      description: isKo ? '60 - 100점 • 즉각 개입 및 감사 필요' : 'Điểm 60 - 100 • Cần can thiệp khẩn cấp',
       avgScore: calcAvg(highList),
     },
     {
       level: 'Trung bình',
-      label: 'Rủi ro Trung bình',
+      label: isKo ? '주의 (보통)' : 'Rủi ro Trung bình',
       count: medList.length,
       percentage: total > 0 ? (medList.length / total) * 100 : 0,
       color: '#f59e0b', // amber-500
@@ -58,12 +61,12 @@ export const RiskDonutChart: React.FC<RiskDonutChartProps> = ({ records }) => {
       bgBadge: 'bg-amber-50',
       textBadge: 'text-amber-700',
       borderBadge: 'border-amber-200',
-      description: 'Điểm 30 - 59 • Cảnh báo cần theo dõi sát',
+      description: isKo ? '30 - 59점 • 주의 집중 관찰 요망' : 'Điểm 30 - 59 • Cảnh báo cần theo dõi sát',
       avgScore: calcAvg(medList),
     },
     {
       level: 'Thấp',
-      label: 'Rủi ro Thấp',
+      label: isKo ? '안심 (낮음)' : 'Rủi ro Thấp',
       count: lowList.length,
       percentage: total > 0 ? (lowList.length / total) * 100 : 0,
       color: '#10b981', // emerald-500
@@ -71,7 +74,7 @@ export const RiskDonutChart: React.FC<RiskDonutChartProps> = ({ records }) => {
       bgBadge: 'bg-emerald-50',
       textBadge: 'text-emerald-700',
       borderBadge: 'border-emerald-200',
-      description: 'Điểm 0 - 29 • Vận hành ổn định trong định mức',
+      description: isKo ? '0 - 29점 • 정상 허용 범위 내 안정 운영' : 'Điểm 0 - 29 • Vận hành ổn định trong định mức',
       avgScore: calcAvg(lowList),
     },
   ];
@@ -160,12 +163,12 @@ export const RiskDonutChart: React.FC<RiskDonutChartProps> = ({ records }) => {
                 <span className="text-slate-400 font-normal text-xs">(Donut Chart)</span>
               </h4>
               <p className="text-xs text-slate-500">
-                Tỷ trọng số ca vận hành theo 3 cấp độ: Thấp, Trung bình & Cao
+                Tỷ trọng số trường hợp vận hành theo 3 cấp độ: Thấp, Trung bình & Cao
               </p>
             </div>
           </div>
           <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
-            {total} ca theo dõi
+            {total} trường hợp theo dõi
           </span>
         </div>
       </div>
@@ -202,7 +205,7 @@ export const RiskDonutChart: React.FC<RiskDonutChartProps> = ({ records }) => {
                       filter: isHovered ? 'drop-shadow(0 4px 6px rgba(0,0,0,0.15))' : 'none',
                     }}
                   >
-                    <title>{`${slice.label}: ${slice.count} ca (${slice.percentage.toFixed(1)}%)`}</title>
+                    <title>{`${slice.label}: ${slice.count} trường hợp (${slice.percentage.toFixed(1)}%)`}</title>
                   </path>
                 );
               })}
@@ -220,10 +223,12 @@ export const RiskDonutChart: React.FC<RiskDonutChartProps> = ({ records }) => {
                   {activeSlice.percentage.toFixed(1)}%
                 </span>
                 <span className="text-xs font-bold text-slate-800 block">
-                  {activeSlice.count} ca
+                  {activeSlice.count} {isKo ? '건' : 'Trường hợp'}
                 </span>
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block">
-                  {activeSlice.level}
+                  {isKo 
+                    ? (activeSlice.level === 'Cao' ? '경고(고위험)' : activeSlice.level === 'Trung bình' ? '주의(보통)' : '안심(낮음)')
+                    : activeSlice.level}
                 </span>
               </div>
             ) : (
@@ -232,10 +237,10 @@ export const RiskDonutChart: React.FC<RiskDonutChartProps> = ({ records }) => {
                   {total}
                 </span>
                 <span className="text-[11px] font-medium text-slate-500 block">
-                  Tổng lượt phân tích
+                  {isKo ? '총 분석 일지' : 'Tổng lượt phân tích'}
                 </span>
                 <span className="text-[10px] text-slate-400 font-mono block mt-0.5">
-                  TB: {overallAvgRisk}/100 đ
+                  {isKo ? '평균:' : 'TB:'} {overallAvgRisk}/100 {isKo ? '점' : 'đ'}
                 </span>
               </div>
             )}
@@ -266,7 +271,7 @@ export const RiskDonutChart: React.FC<RiskDonutChartProps> = ({ records }) => {
                     <span className="text-xs font-bold text-slate-900">{slice.label}</span>
                   </div>
                   <div className="flex items-center space-x-1.5 text-xs font-mono font-bold">
-                    <span className="text-slate-800">{slice.count} ca</span>
+                    <span className="text-slate-800">{slice.count} {isKo ? '건' : 'Trường hợp'}</span>
                     <span className="text-slate-400">({slice.percentage.toFixed(1)}%)</span>
                   </div>
                 </div>
@@ -274,7 +279,7 @@ export const RiskDonutChart: React.FC<RiskDonutChartProps> = ({ records }) => {
                 <div className="flex items-center justify-between text-[11px] text-slate-500 mt-1 pl-4.5">
                   <span className="truncate">{slice.description}</span>
                   <span className="font-mono shrink-0 ml-1 text-slate-600 font-semibold">
-                    TB: {slice.avgScore} đ
+                    {isKo ? '평균:' : 'TB:'} {slice.avgScore} {isKo ? '점' : 'đ'}
                   </span>
                 </div>
               </div>
@@ -290,17 +295,21 @@ export const RiskDonutChart: React.FC<RiskDonutChartProps> = ({ records }) => {
           <span>
             {highList.length > 0 ? (
               <span className="text-rose-700 font-semibold">
-                Có {highList.length} ca rủi ro cao ({((highList.length / (total || 1)) * 100).toFixed(1)}%) cần kiểm tra ngay.
+                {isKo 
+                  ? `경고(고위험) ${highList.length}건 (${((highList.length / (total || 1)) * 100).toFixed(1)}%) 발생 — 즉시 확인이 필요합니다.`
+                  : `Có ${highList.length} trường hợp rủi ro cao (${((highList.length / (total || 1)) * 100).toFixed(1)}%) cần kiểm tra ngay.`}
               </span>
             ) : (
               <span className="text-emerald-700 font-semibold">
-                Hệ thống ổn định: 0 ca rủi ro cao trong tập lọc hiện tại.
+                {isKo 
+                  ? '시스템 안정: 현재 필터 조건 내 고위험 항목 0건.'
+                  : 'Hệ thống ổn định: 0 trường hợp rủi ro cao trong tập lọc hiện tại.'}
               </span>
             )}
           </span>
         </div>
         <span className="text-[11px] text-slate-400">
-          Chỉ số tự động đồng bộ theo bộ lọc Canteen & Thời gian
+          {isKo ? '급식소 및 조회 기간 필터와 자동 동기화됨' : 'Chỉ số tự động đồng bộ theo bộ lọc Canteen & Thời gian'}
         </span>
       </div>
     </div>

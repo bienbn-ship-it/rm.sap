@@ -1,6 +1,7 @@
 import React from 'react';
-import { X, RotateCcw, SlidersHorizontal, Check, AlertCircle } from 'lucide-react';
+import { X, RotateCcw, SlidersHorizontal, Check } from 'lucide-react';
 import { RiskThresholds, DEFAULT_THRESHOLDS } from '../types/canteen';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ThresholdSettingsProps {
   isOpen: boolean;
@@ -15,7 +16,10 @@ export const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
   thresholds,
   onChange,
 }) => {
+  const { language, t } = useLanguage();
   if (!isOpen) return null;
+
+  const isKo = language === 'ko';
 
   const handleChange = (key: keyof RiskThresholds, value: number) => {
     onChange({
@@ -39,10 +43,10 @@ export const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">
-                Ngưỡng Cảnh Báo & Chấm Điểm Rủi Ro
+                {t.threshModalTitle}
               </h3>
               <p className="text-xs text-slate-500">
-                Điều chỉnh các mốc cảnh báo tự động cho toàn bộ hệ thống bếp ăn
+                {t.threshModalDesc}
               </p>
             </div>
           </div>
@@ -61,9 +65,11 @@ export const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
             <div className="flex justify-between items-center mb-1.5">
               <div>
                 <label className="text-sm font-semibold text-slate-800">
-                  GR vượt kế hoạch Menu (%)
+                  {isKo ? '메뉴 계획 대비 입고(GR) 초과율 (%)' : 'GR vượt kế hoạch Menu (%)'}
                 </label>
-                <p className="text-xs text-slate-500">Cộng 20 điểm rủi ro khi giá trị nhập kho vượt kế hoạch</p>
+                <p className="text-xs text-slate-500">
+                  {isKo ? '입고 금액이 계획을 초과할 경우 리스크 20점 부과' : 'Cộng 20 điểm rủi ro khi giá trị nhập kho vượt kế hoạch'}
+                </p>
               </div>
               <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
                 {thresholds.gr_over_plan_high}%
@@ -95,9 +101,11 @@ export const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
             <div className="flex justify-between items-center mb-1.5">
               <div>
                 <label className="text-sm font-semibold text-slate-800">
-                  PR3 / Tổng đặt hàng cao (%)
+                  {isKo ? '총 발주 대비 추가발주(PR3) 초과율 (%)' : 'PR3 / Tổng đặt hàng cao (%)'}
                 </label>
-                <p className="text-xs text-slate-500">Cộng 20 điểm rủi ro khi đơn mua phát sinh ngoài kế hoạch vượt ngưỡng</p>
+                <p className="text-xs text-slate-500">
+                  {isKo ? '계획 외 추가/긴급 발주가 임계치를 초과할 경우 리스크 20점 부과' : 'Cộng 20 điểm rủi ro khi đơn mua phát sinh ngoài kế hoạch vượt ngưỡng'}
+                </p>
               </div>
               <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
                 {thresholds.pr3_high}%
@@ -130,12 +138,18 @@ export const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
               <div className="flex justify-between items-center mb-1">
                 <div>
                   <label className="text-sm font-semibold text-slate-800">
-                    Tồn kho / GR cao (%)
+                    {isKo 
+                      ? `재고 / 입고(GR) 과다 비율 (${thresholds.inventory_high}% ~ ${(thresholds.inventory_high / 100).toFixed(2)})`
+                      : `Hệ số Tồn kho / GR cao (${thresholds.inventory_high}% ~ ${(thresholds.inventory_high / 100).toFixed(2)})`}
                   </label>
-                  <p className="text-xs text-slate-500">Cộng 15 điểm rủi ro khi tồn đọng quá nhiều nguyên vật liệu</p>
+                  <p className="text-xs text-slate-500">
+                    {isKo 
+                      ? `기말 재고가 입고액의 ${(thresholds.inventory_high / 100).toFixed(2)}배를 초과 시 리스크 15점 부과`
+                      : `Cộng 15 điểm rủi ro khi tồn cuối kỳ vượt quá ${(thresholds.inventory_high / 100).toFixed(2)} lần lượng nhập GR`}
+                  </p>
                 </div>
                 <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
-                  {thresholds.inventory_high}%
+                  {(thresholds.inventory_high / 100).toFixed(2)} ({thresholds.inventory_high}%)
                 </span>
               </div>
               <div className="flex items-center space-x-3">
@@ -163,9 +177,11 @@ export const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
               <div className="flex justify-between items-center mb-1">
                 <div>
                   <label className="text-sm font-semibold text-slate-800">
-                    Tồn kho / GR quá thấp (%)
+                    {isKo ? '재고 / 입고(GR) 과소 경고 (%)' : 'Tồn kho / GR quá thấp (%)'}
                   </label>
-                  <p className="text-xs text-slate-500">Cộng 8 điểm rủi ro khi thiếu hụt hàng dự phòng an toàn</p>
+                  <p className="text-xs text-slate-500">
+                    {isKo ? '안전 완충재고 부족 위험 시 리스크 8점 부과' : 'Cộng 8 điểm rủi ro khi thiếu hụt hàng dự phòng an toàn'}
+                  </p>
                 </div>
                 <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
                   {thresholds.inventory_low}%
@@ -199,9 +215,11 @@ export const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
             <div className="flex justify-between items-center mb-1.5">
               <div>
                 <label className="text-sm font-semibold text-slate-800">
-                  Lệch suất ăn kế hoạch (%)
+                  {isKo ? '예정 식수 대비 오차 허용치 (%)' : 'Lệch suất ăn kế hoạch (%)'}
                 </label>
-                <p className="text-xs text-slate-500">Cộng 12 điểm rủi ro khi số suất confirm lệch kế hoạch vượt ngưỡng</p>
+                <p className="text-xs text-slate-500">
+                  {isKo ? '실적 식수가 계획과 크게 벗어날 시 리스크 12점 부과' : 'Cộng 12 điểm rủi ro khi số suất confirm lệch kế hoạch vượt ngưỡng'}
+                </p>
               </div>
               <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
                 {thresholds.meal_gap_high}%
@@ -233,9 +251,11 @@ export const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
             <div className="flex justify-between items-center mb-1.5">
               <div>
                 <label className="text-sm font-semibold text-slate-800">
-                  GR / Doanh thu cao (%)
+                  {isKo ? '매출 대비 입고액(GR) 비율 상한 (%)' : 'GR / Doanh thu cao (%)'}
                 </label>
-                <p className="text-xs text-slate-500">Cộng 15 điểm rủi ro khi tỷ lệ nhập hàng ăn mòn biên lợi nhuận</p>
+                <p className="text-xs text-slate-500">
+                  {isKo ? '입고 비용 비율이 매출 이익률을 훼손할 시 리스크 15점 부과' : 'Cộng 15 điểm rủi ro khi tỷ lệ nhập hàng ăn mòn biên lợi nhuận'}
+                </p>
               </div>
               <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
                 {thresholds.gr_revenue_high}%
@@ -267,12 +287,14 @@ export const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
             <div className="flex justify-between items-center mb-1.5">
               <div>
                 <label className="text-sm font-semibold text-slate-800">
-                  Cảnh báo cận hạn (ngày)
+                  {isKo ? '유통기한 임박 경고 기준 (일)' : 'Cảnh báo cận hạn (ngày)'}
                 </label>
-                <p className="text-xs text-slate-500">Cộng 15 điểm khi HSD ≤ số ngày này (+25 điểm nếu đã hết hạn)</p>
+                <p className="text-xs text-slate-500">
+                  {isKo ? '잔여 유통기한이 설정 일수 이하 시 15점 부과 (만료 시 25점)' : 'Cộng 15 điểm khi HSD ≤ số ngày này (+25 điểm nếu đã hết hạn)'}
+                </p>
               </div>
               <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
-                {thresholds.expiry_warning_days} ngày
+                {thresholds.expiry_warning_days} {isKo ? '일' : 'ngày'}
               </span>
             </div>
             <div className="flex items-center space-x-3">
@@ -301,9 +323,11 @@ export const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
             <div className="flex justify-between items-center mb-1.5">
               <div>
                 <label className="text-sm font-semibold text-slate-800">
-                  Tồn kho trên mỗi suất ăn cao (VNĐ/suất)
+                  {isKo ? '1식당 재고 보유액 상한 (VNĐ/식)' : 'Tồn kho trên mỗi suất ăn cao (VNĐ/suất)'}
                 </label>
-                <p className="text-xs text-slate-500">Cộng 15 điểm rủi ro khi số tiền tồn kho/suất ăn vượt định mức cho phép</p>
+                <p className="text-xs text-slate-500">
+                  {isKo ? '1식당 재고 금액이 허용 기준을 초과할 경우 리스크 15점 부과' : 'Cộng 15 điểm rủi ro khi số tiền tồn kho/suất ăn vượt định mức cho phép'}
+                </p>
               </div>
               <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
                 {(thresholds.inventory_per_meal_high || 15000).toLocaleString('vi-VN')} ₫
@@ -339,14 +363,14 @@ export const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
             className="text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-1.5 px-3 py-1.5 rounded-lg hover:bg-slate-200/60 transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Khôi phục mặc định</span>
+            <span>{t.threshResetDefault}</span>
           </button>
           <button
             onClick={onClose}
             className="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-xs transition-colors flex items-center space-x-1.5"
           >
             <Check className="w-4 h-4" />
-            <span>Áp dụng ngay</span>
+            <span>{t.threshSave}</span>
           </button>
         </div>
       </div>

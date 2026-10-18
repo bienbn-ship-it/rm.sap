@@ -10,6 +10,7 @@ import {
   Calendar,
   Filter
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface TabRiskMatrixProps {
   records: CanteenRecord[];
@@ -17,8 +18,10 @@ interface TabRiskMatrixProps {
 }
 
 export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, thresholds }) => {
+  const { language, t } = useLanguage();
   const [reasonFilter, setReasonFilter] = useState<string>('ALL');
   const [quickFilter, setQuickFilter] = useState<'ALL' | 'PR3_MISMATCH' | 'INV_HIGH' | 'HIGH_RISK' | 'COST_ANOMALY'>('ALL');
+  const isKo = language === 'ko';
 
   // Sorted by risk score descending
   const sortedRisks = [...records].sort((a, b) => {
@@ -84,14 +87,14 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
           }`}
         >
           <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-            <span className="font-semibold text-rose-700">Vi Phạm Quy Trình PR3</span>
+            <span className="font-semibold text-rose-700">{isKo ? 'PR3 절차 위반' : 'Vi Phạm Quy Trình PR3'}</span>
             <AlertTriangle className="w-4 h-4 text-rose-500" />
           </div>
           <div className="text-2xl font-bold text-rose-700 font-mono">
-            {pr3MismatchTotal} <span className="text-xs font-normal text-slate-500">ca ghi nhận</span>
+            {pr3MismatchTotal} <span className="text-xs font-normal text-slate-500">{isKo ? '건 감지' : 'trường hợp ghi nhận'}</span>
           </div>
           <p className="text-[11px] text-slate-500 mt-1">
-            Suất ăn giảm nhưng đơn PR3 lại tăng
+            {isKo ? '식수 감소에도 PR3 발주 증가' : 'Suất ăn giảm nhưng đơn PR3 lại tăng'}
           </p>
         </div>
 
@@ -104,14 +107,14 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
           }`}
         >
           <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-            <span className="font-semibold text-indigo-700">Tồn Kho / Suất Ăn Cao</span>
+            <span className="font-semibold text-indigo-700">{isKo ? '1식당 재고 과다' : 'Tồn Kho / Suất Ăn Cao'}</span>
             <Tag className="w-4 h-4 text-indigo-500" />
           </div>
           <div className="text-2xl font-bold text-indigo-900 font-mono">
-            {invHighTotal} <span className="text-xs font-normal text-slate-500">ca vượt ngưỡng</span>
+            {invHighTotal} <span className="text-xs font-normal text-slate-500">{isKo ? '건 초과' : 'trường hợp vượt ngưỡng'}</span>
           </div>
           <p className="text-[11px] text-slate-500 mt-1">
-            TB: <strong className="text-indigo-900">{formatVND(avgInvPerMeal)} ₫</strong> • Max: <strong className="text-rose-600">{formatVND(maxInvPerMeal)} ₫</strong>
+            {isKo ? '평균:' : 'TB:'} <strong className="text-indigo-900">{formatVND(avgInvPerMeal)} ₫</strong> • {isKo ? '최대:' : 'Max:'} <strong className="text-rose-600">{formatVND(maxInvPerMeal)} ₫</strong>
           </p>
         </div>
 
@@ -124,14 +127,14 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
           }`}
         >
           <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-            <span className="font-semibold text-rose-700">Dòng Rủi Ro Cao</span>
+            <span className="font-semibold text-rose-700">{isKo ? '고위험 리스크' : 'Dòng Rủi Ro Cao'}</span>
             <ShieldAlert className="w-4 h-4 text-rose-600" />
           </div>
           <div className="text-2xl font-bold text-rose-600 font-mono">
-            {highRiskTotal} <span className="text-xs font-normal text-slate-500">ca (Điểm ≥ 60)</span>
+            {highRiskTotal} <span className="text-xs font-normal text-slate-500">{isKo ? '건 (점수 ≥ 60)' : 'trường hợp (Điểm ≥ 60)'}</span>
           </div>
           <p className="text-[11px] text-slate-500 mt-1">
-            Cần rà soát và kiểm toán nghiệp vụ ngay
+            {isKo ? '즉시 현장 실사 및 감사 필요' : 'Cần rà soát và kiểm toán nghiệp vụ ngay'}
           </p>
         </div>
 
@@ -144,14 +147,14 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
           }`}
         >
           <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-            <span className="font-semibold text-purple-700">Dị Biệt Chi Phí / Suất</span>
+            <span className="font-semibold text-purple-700">{isKo ? '식재료비 이상치' : 'Dị Biệt Chi Phí / Suất'}</span>
             <AlertOctagon className="w-4 h-4 text-purple-600" />
           </div>
           <div className="text-2xl font-bold text-purple-700 font-mono">
-            {costAnomalyTotal} <span className="text-xs font-normal text-slate-500">ca (|Z| ≥ 3.5)</span>
+            {costAnomalyTotal} <span className="text-xs font-normal text-slate-500">{isKo ? '건 (|Z| ≥ 3.5)' : 'trường hợp (|Z| ≥ 3.5)'}</span>
           </div>
           <p className="text-[11px] text-slate-500 mt-1">
-            Biến động chi phí bất thường so với 14 ngày
+            {isKo ? '14일 이동평균 대비 이상 급변' : 'Biến động chi phí bất thường so với 14 ngày'}
           </p>
         </div>
       </div>
@@ -164,19 +167,21 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">
-                Nguyên Liệu Cận Hạn & Đã Hết Hạn
+                {isKo ? '유통기한 임박 및 만료 식재료' : 'Nguyên Liệu Cận Hạn & Đã Hết Hạn'}
               </h3>
               <p className="text-xs text-slate-500">
-                Cảnh báo các lô hàng có hạn sử dụng còn lại &le; {thresholds.expiry_warning_days} ngày hoặc đã quá hạn
+                {isKo 
+                  ? `잔여 유통기한이 ${thresholds.expiry_warning_days}일 이하이거나 이미 만료된 품목 경고` 
+                  : `Cảnh báo các lô hàng có hạn sử dụng còn lại ≤ ${thresholds.expiry_warning_days} ngày hoặc đã quá hạn`}
               </p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
-              {expiryItems.filter(i => (i.days_to_expiry ?? 0) < 0).length} Lô đã hết hạn
+              {expiryItems.filter(i => (i.days_to_expiry ?? 0) < 0).length} {isKo ? '개 품목 만료' : 'Lô đã hết hạn'}
             </span>
             <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-              {expiryItems.filter(i => (i.days_to_expiry ?? 0) >= 0).length} Lô cận hạn
+              {expiryItems.filter(i => (i.days_to_expiry ?? 0) >= 0).length} {isKo ? '개 품목 임박' : 'Lô cận hạn'}
             </span>
           </div>
         </div>
@@ -186,14 +191,14 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-200 text-[11px]">
                 <tr>
-                  <th className="px-4 py-3">Ngày ghi nhận</th>
-                  <th className="px-3 py-3">Canteen</th>
-                  <th className="px-3 py-3">Tên Nguyên Liệu</th>
-                  <th className="px-3 py-3">Hạn Sử Dụng (HSD)</th>
-                  <th className="px-3 py-3 text-center">Số Ngày Còn Lại</th>
-                  <th className="px-3 py-3 text-center">Trạng Thái</th>
-                  <th className="px-3 py-3 text-right">SL Tồn Kho</th>
-                  <th className="px-3 py-3 text-center">Mức Rủi Ro</th>
+                  <th className="px-4 py-3">{isKo ? '기록 일자' : 'Ngày ghi nhận'}</th>
+                  <th className="px-3 py-3">{t.tableCanteen}</th>
+                  <th className="px-3 py-3">{isKo ? '식재료명' : 'Tên Nguyên Liệu'}</th>
+                  <th className="px-3 py-3">{isKo ? '유통기한 (HSD)' : 'Hạn Sử Dụng (HSD)'}</th>
+                  <th className="px-3 py-3 text-center">{isKo ? '잔여 일수' : 'Số Ngày Còn Lại'}</th>
+                  <th className="px-3 py-3 text-center">{isKo ? '상태' : 'Trạng Thái'}</th>
+                  <th className="px-3 py-3 text-right">{isKo ? '재고 수량' : 'SL Tồn Kho'}</th>
+                  <th className="px-3 py-3 text-center">{isKo ? '리스크 등급' : 'Mức Rủi Ro'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
@@ -216,7 +221,7 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
                         {item.canteen}
                       </td>
                       <td className="px-3 py-3 font-bold text-slate-900">
-                        {item.ingredient || 'Nguyên liệu chưa định danh'}
+                        {item.ingredient || (isKo ? '미식별 품목' : 'Nguyên liệu chưa định danh')}
                       </td>
                       <td className="px-3 py-3 whitespace-nowrap font-mono text-slate-600">
                         {item.expiry_date}
@@ -225,7 +230,9 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
                         <span className={`font-mono font-bold text-sm ${
                           isExpired ? 'text-rose-600' : isUrgent ? 'text-amber-600' : 'text-slate-800'
                         }`}>
-                          {days < 0 ? `Quá ${Math.abs(days)} ngày` : `${days} ngày`}
+                          {days < 0 
+                            ? (isKo ? `${Math.abs(days)}일 초과` : `Quá ${Math.abs(days)} ngày`) 
+                            : (isKo ? `${days}일 남음` : `${days} ngày`)}
                         </span>
                       </td>
                       <td className="px-3 py-3 text-center whitespace-nowrap">
@@ -238,11 +245,15 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
                               : 'bg-yellow-100 text-yellow-800'
                           }`}
                         >
-                          {isExpired ? 'ĐÃ HẾT HẠN' : isUrgent ? 'KHẨN CẤP < 7 NGÀY' : 'CẬN HẠN'}
+                          {isExpired 
+                            ? (isKo ? '만료됨' : 'ĐÃ HẾT HẠN') 
+                            : isUrgent 
+                            ? (isKo ? '긴급 < 7일' : 'KHẨN CẤP < 7 NGÀY') 
+                            : (isKo ? '임박' : 'CẬN HẠN')}
                         </span>
                       </td>
                       <td className="px-3 py-3 text-right whitespace-nowrap font-mono">
-                        {item.inventory_qty?.toLocaleString('vi-VN') || 0} kg/đv
+                        {item.inventory_qty?.toLocaleString('vi-VN') || 0} {isKo ? '단위' : 'kg/đv'}
                       </td>
                       <td className="px-3 py-3 text-center whitespace-nowrap">
                         <span
@@ -254,7 +265,9 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
                               : 'bg-emerald-100 text-emerald-800'
                           }`}
                         >
-                          {item.risk_level}
+                          {isKo 
+                            ? (item.risk_level === 'Cao' ? '경고(높음)' : item.risk_level === 'Trung bình' ? '주의(보통)' : '안심(낮음)')
+                            : item.risk_level}
                         </span>
                       </td>
                     </tr>
@@ -265,7 +278,7 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
           </div>
         ) : (
           <div className="p-8 text-center text-xs text-slate-500">
-            Không có nguyên liệu nào cận hạn hoặc quá hạn trong khoảng thời gian đang xét.
+            {isKo ? '조회 기간 내 유통기한 임박 또는 만료 품목이 없습니다.' : 'Không có nguyên liệu nào cận hạn hoặc quá hạn trong khoảng thời gian đang xét.'}
           </div>
         )}
       </div>
@@ -279,10 +292,10 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">
-                Bảng Xếp Hạng Nhật Ký Rủi Ro Vận Hành
+                {isKo ? '운영 리스크 종합 순위 일지' : 'Bảng Xếp Hạng Nhật Ký Rủi Ro Vận Hành'}
               </h3>
               <p className="text-xs text-slate-500">
-                Sắp xếp theo thứ tự điểm rủi ro từ cao nhất xuống thấp nhất (Thang điểm 0 - 100)
+                {isKo ? '리스크 점수 높은 순 정렬 (0 - 100점 척도)' : 'Sắp xếp theo thứ tự điểm rủi ro từ cao nhất xuống thấp nhất (Thang điểm 0 - 100)'}
               </p>
             </div>
           </div>
@@ -295,7 +308,7 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
               onChange={(e) => setReasonFilter(e.target.value)}
               className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="ALL">Lọc theo Lý do cảnh báo (Tất cả)</option>
+              <option value="ALL">{isKo ? '경고 사유별 필터 (전체)' : 'Lọc theo Lý do cảnh báo (Tất cả)'}</option>
               {allReasons.map((r) => (
                 <option key={r} value={r}>
                   {r}
@@ -309,19 +322,19 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
           <table className="w-full text-xs text-left">
             <thead className="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-200 text-[11px]">
               <tr>
-                <th className="px-4 py-3">Ngày</th>
-                <th className="px-3 py-3">Canteen</th>
-                <th className="px-3 py-3 text-center">Điểm Rủi Ro</th>
-                <th className="px-3 py-3 text-center">Phân Loại</th>
-                <th className="px-4 py-3">Lý Do Cảnh Báo Vi Phạm</th>
-                <th className="px-3 py-3 text-center bg-rose-50/60 text-rose-900">Quy Trình PR3</th>
-                <th className="px-3 py-3 text-right bg-indigo-50/60 text-indigo-950 font-bold">Tồn Kho / Suất</th>
-                <th className="px-3 py-3 text-right">% GR vs Kế Hoạch</th>
-                <th className="px-3 py-3 text-right">% PR3 Đặt Thêm</th>
-                <th className="px-3 py-3 text-right">Tồn kho / GR</th>
-                <th className="px-3 py-3 text-right">CP NVL / Suất</th>
-                <th className="px-3 py-3 text-right">Lệch Suất (%)</th>
-                <th className="px-3 py-3 text-right">GR / Doanh Thu</th>
+                <th className="px-4 py-3">{isKo ? '일자' : 'Ngày'}</th>
+                <th className="px-3 py-3">{t.tableCanteen}</th>
+                <th className="px-3 py-3 text-center">{isKo ? '리스크 점수' : 'Điểm Rủi Ro'}</th>
+                <th className="px-3 py-3 text-center">{isKo ? '등급' : 'Phân Loại'}</th>
+                <th className="px-4 py-3">{isKo ? '경고 및 위반 사유' : 'Lý Do Cảnh Báo Vi Phạm'}</th>
+                <th className="px-3 py-3 text-center bg-rose-50/60 text-rose-900">{isKo ? 'PR3 절차' : 'Quy Trình PR3'}</th>
+                <th className="px-3 py-3 text-right bg-indigo-50/60 text-indigo-950 font-bold">{t.tableInventoryPerMeal}</th>
+                <th className="px-3 py-3 text-right">{isKo ? '% GR vs 계획' : '% GR vs Kế Hoạch'}</th>
+                <th className="px-3 py-3 text-right">{isKo ? '% PR3 추가' : '% PR3 Đặt Thêm'}</th>
+                <th className="px-3 py-3 text-right" title="Hệ số Tồn kho/GR = Tồn cuối / GR | Tồn kho/GI = Tồn cuối / GI">{t.tableInventoryRatioHeader}</th>
+                <th className="px-3 py-3 text-right">{isKo ? '1식당 재료비' : 'CP NVL / Suất'}</th>
+                <th className="px-3 py-3 text-right">{isKo ? '식수 오차 (%)' : 'Lệch Suất (%)'}</th>
+                <th className="px-3 py-3 text-right">{isKo ? 'GR / 매출비율' : 'GR / Doanh Thu'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
@@ -362,7 +375,9 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
                             : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                         }`}
                       >
-                        {r.risk_level}
+                        {isKo 
+                          ? (r.risk_level === 'Cao' ? '경고(높음)' : r.risk_level === 'Trung bình' ? '주의(보통)' : '안심(낮음)')
+                          : r.risk_level}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -377,7 +392,7 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
                             </span>
                           ))
                         ) : (
-                          <span className="text-slate-400 italic">Vận hành bình thường trong ngưỡng</span>
+                          <span className="text-slate-400 italic">{isKo ? '허용 범위 내 정상 운영' : 'Vận hành bình thường trong ngưỡng'}</span>
                         )}
                       </div>
                     </td>
@@ -387,10 +402,10 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
                           className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300 animate-pulse"
                           title={r.pr3_meal_mismatch_desc || 'Suất ăn giảm nhưng PR3 tăng'}
                         >
-                          ⚠️ Vi phạm QT
+                          ⚠️ {isKo ? '절차위반' : 'Vi phạm QT'}
                         </span>
                       ) : (
-                        <span className="text-slate-400 text-xs">Chuẩn</span>
+                        <span className="text-slate-400 text-xs">{isKo ? '정상' : 'Chuẩn'}</span>
                       )}
                     </td>
                     <td className="px-3 py-3 text-right whitespace-nowrap font-mono font-bold bg-indigo-50/20">
@@ -409,8 +424,11 @@ export const TabRiskMatrix: React.FC<TabRiskMatrixProps> = ({ records, threshold
                       </span>
                     </td>
                     <td className="px-3 py-3 text-right whitespace-nowrap font-mono">
-                      <span className={r.inventory_ratio_pct > thresholds.inventory_high ? 'text-rose-600 font-bold' : ''}>
-                        {r.inventory_ratio_pct}%
+                      <span className={r.inventory_ratio_pct > thresholds.inventory_high ? 'text-rose-600 font-bold' : 'text-slate-800'}>
+                        GR: {r.inventory_to_gr_ratio !== undefined ? r.inventory_to_gr_ratio.toFixed(2) : (r.ending_inventory_value / (r.gr_value || 1)).toFixed(2)}
+                      </span>
+                      <span className="text-[10px] text-slate-400 block" title="Hệ số Tồn kho cuối / GI xuất kho">
+                        GI: {r.inventory_to_gi_ratio !== undefined ? r.inventory_to_gi_ratio.toFixed(2) : (r.ending_inventory_value / (r.gi_value || 1)).toFixed(2)}
                       </span>
                     </td>
                     <td className="px-3 py-3 text-right whitespace-nowrap font-mono">
